@@ -1,4 +1,5 @@
-# HOWTO: Create an admin sub-site in Hobo
+# HOWTO
+## Create an admin sub-site in Hobo
 
 A sub-site is part of a web-app that has the appearance and behavior of a separate site. The most
 common example of a sub-site is an "admin" section. This guide shows how to create a typical
