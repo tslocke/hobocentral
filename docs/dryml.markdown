@@ -225,6 +225,8 @@ Here, `<repeat>` changes the context as it iterates over a collection.
 tags in a tag library called Hobo Rapid (not described here).
 
 ---
+### `<do>` and `<with>`
+
 `<do>` and `<with>` exist to provide a convenient way to change the context. All they do is output their
 contents. For example:
 
@@ -238,7 +240,7 @@ contents. For example:
 Use `<do>` when you want to use the `with` attribute, and `<with>` when you want to use `field` (because `<with with="">` is horrible).
 
 ---
-Control tags
+### Control tags
 
     <if test="&this.administrator?">
       <p>Hi admin</p>
@@ -267,7 +269,7 @@ the following:
 You can even set `Hobo::Dryml.last_if` in your own tags and make use of `<else>`.
 
 ---
-Control attributes
+### Control attributes
 
 In addition to the `<if>` and `<unless>` tags, Hobo supports `if` and `unless` attributes on all tags.
 
@@ -275,7 +277,7 @@ In addition to the `<if>` and `<unless>` tags, Hobo supports `if` and `unless` a
 {: .dryml}
 
 ---
-`<include>`
+### `<include>`
 
 Include a tag library file.
 
@@ -296,6 +298,8 @@ Includes a taglib from a plugin. The file should be in `vendor/plugins/<plugin n
 
 
 ---
+### `<def>`
+
 `<def>` is used to define tags. We have seen a few simple examples of using it already. This section describes some of the more advanced features. Tag and attribute names should be lower case, and should use hyphens instead of underscores to separate words.
 
 The attributes passed to a tag when it is used are stored in a Ruby hash called `attributes`. For example:
