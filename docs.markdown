@@ -7,8 +7,8 @@
 
 ## Tutorials
 
- * [POD Tutorial (classified ads)](/pod-tutorial)
  * [Agility Tutorial (story manager)](/agility-tutorial)
+ * [POD Tutorial (classified ads)](/pod-tutorial)
 
 ## Manual
 
