@@ -22,6 +22,10 @@
    * [HoboSupport](/hobosupport)
 
 
+## Howtos
+
+[LINKS TO howtos]
+
 ## Examples
 
 ### [beta.hobocentral.net](http://beta.hobocentral.net)
