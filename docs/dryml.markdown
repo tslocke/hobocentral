@@ -1,7 +1,8 @@
 # DRYML
 
 This section describes the basic mechanisms of DRYML and covers the core tags and attributes
-provided by the language. The richer set of tags provided by Hobo Rapid are documented elsewhere.
+provided by the language as part of the DRYML plugin. The richer set of tags provided by
+Hobo Rapid are documented elsewhere.
 
 We begin with an example of using a tag:
 
@@ -224,8 +225,8 @@ Here, `<repeat>` changes the context as it iterates over a collection.
 tags in a tag library called Hobo Rapid (not described here).
 
 ---
-`<do>` and `<with>` do absolutely nothing (except output their contents). They just provide you with a 
-convenient way to change the context without outputting anything. For example:
+`<do>` and `<with>` exist to provide a convenient way to change the context. All they do is output their
+contents. For example:
 
     <do with="&@my_blog_post">
       <view:title/>
@@ -238,19 +239,61 @@ Use `<do>` when you want to use the `with` attribute, and `<with>` when you want
 
 ---
 Control tags
-`<if test="&conditions">`
-`<else>`
-`<unless test="&conditions">`
 
+    <if test="&this.administrator?">
+      <p>Hi admin</p>
+    </if>
+    <else>
+      <p>Hi normal user</p>
+    </else>
+{: .dryml}
+
+`<if>` evaluates the Ruby code in the `test` attribute and outputs the content if the test returns true. If no `test` attribute is provided, `<if>` tests !this.blank?
+
+`<unless>` works the same as `<if>` but outputs the content if the test returns false.
+  
+`<else>` outputs the given content if `Hobo::Dryml.last_if` is false. This variable is set by several tags including
+`<if>` and `<unless>`. `<repeat>` also sets `Hobo::Dryml.last_if` to false if the array provided is empty, so you can do
+the following:
+
+    <repeat>
+      <p><name/></p>
+    </repeat>
+    <else>
+      <p>There are none!</p>
+    </else>
+{: .dryml}
+
+You can even set `Hobo::Dryml.last_if` in your own tags and make use of `<else>`.
+
+---
 Control attributes
-`<do if="&conditions">`
 
-TODO
+In addition to the `<if>` and `<unless>` tags, Hobo supports `if` and `unless` attributes on all tags.
+
+    <div if="&this.administrator?">Welcome</div>
+{: .dryml}
 
 ---
 `<include>`
 
-TODO
+Include a tag library file.
+
+    <include src="admin.dryml">
+{: .dryml}
+
+Includes `admin.dryml` which should be in the same directory as the file containing the `<include>`.
+
+    <include src="taglibs/admin.dryml">
+{: .dryml}
+  
+When a `/` is present in the filename the include filename is relative to `app/views/`. The example above includes `app/views/taglibs/admin.dryml`.
+
+    <include src="rapid" plugin="hobo"/>
+{: .dryml}
+
+Includes a taglib from a plugin. The file should be in `vendor/plugins/<plugin name>/taglibs`.
+
 
 ---
 `<def>` is used to define tags. We have seen a few simple examples of using it already. This section describes some of the more advanced features. Tag and attribute names should be lower case, and should use hyphens instead of underscores to separate words.
