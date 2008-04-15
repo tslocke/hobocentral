@@ -6,6 +6,7 @@ Without writing any view layer code at all, the POD application is already in a 
  
  * DRYML has a unique and powerful *paramaterisation* mechanism. All those automatic pages that are *almost but not quite* what you want -- you won't have to throw away any of it. DRYML will allow you to make very specific changes, small or large. Mark-up that you don't want to change will remain.
 
-1. [Application Wide Tags](/pod-tutorial/3-1-dryml-app-wide-tags)
-2. [Customizing the Generic Pages](/pod-tutorial/3-2-dryml-generic-pages)
-3. [Writing Individual Pages](/pod-tutorial/3-3-dryml-individual-pages)
+1. application.dryml
+2. Customizing the front page
+3. Customizing a show page
+4. Tweaking the theme
