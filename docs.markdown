@@ -22,6 +22,12 @@
    * [HoboSupport](/hobosupport)
 
 
+## Tag Libraries
+
+We've got some *very* preliminary refernce docs for the tag libraries. It's just generated from the source, there's no actual commentary at this stage
+
+[LINKS TO tag-libraries]
+
 ## Howtos
 
 [LINKS TO howtos]
