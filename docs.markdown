@@ -13,6 +13,7 @@
 ## Manual
 
  * [Generators](/docs/generators)
+ * [Customising Model Controllers](/docs/controllers)
  * [DRYML](/docs/dryml)
  * **Hobo Components**
 
