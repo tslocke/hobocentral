@@ -15,7 +15,7 @@ A simple classified adverts app.
 
 ## [Part 3 - Customizing Views with DRYML](3-customizing-views-with-dryml)
 
-1. application.dryml
-2. Customizing the front page
-3. Customizing a show page
-4. Tweaking the theme
+1. [application.dryml](3-customizing-views-with-dryml/#application-dryml)
+2. [Customizing the front page](3-customizing-views-with-dryml/#customizing-front-page)
+3. [Customizing a show page](3-customizing-views-with-dryml/#customizing-show-page)
+4. [Tweaking the theme](3-customizing-views-with-dryml/#tweaking-theme)

@@ -315,6 +315,4 @@ Refresh the browser and you should see:
 
 <img src="/images/tutorial/front-with-models.png">
 
-TODO: bigger tour of the generated app, explain the routes created by model controllers, explain the first signed up user is admin
-
 Next: [Part 2. Customizing Models and Controllers](/pod-tutorial/2-customizing-models-and-controllers)

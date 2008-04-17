@@ -5,13 +5,15 @@ already be quite close to what you want, other parts will not. Now it is time to
 the app to your needs. 
 
 Your initial inclination might be to dive in to `app/views` and start modifying the individual 
-page views. However, you will soon find that initially there are no files for the individual 
-pages in the generic app. Hobo doesn't generate the generic views in your app, they are being rendered using a set of generic page tags provided by the Hobo Rapid library. DRYML allows these page tags to be customized in powerful ways without having to re-define parts of the page that you don't want to change. 
+page views. However, you will soon find that initially there are very few files for the individual 
+pages in the generic app. With the exception of the front page, Hobo doesn't generate the generic views in your app. They are being rendered using a set of generic page tags provided by the Hobo Rapid library. DRYML allows these page tags to be customized in powerful ways without having to re-define parts of the page that you don't want to change. 
 
 But before we dive into DRYML we can change the behavior of the generated UI in several ways by making changes to our models and controllers, and these are a good place to start.
 
 1. [Model Layer](#model-layer)
 2. [Resource Controllers](#resource-controllers)
+
+---
 
 ## <a name="model-layer">Model Layer</a>
 
@@ -22,7 +24,7 @@ they are designed to give you model level integrity they are also used by many o
 tags. This means that the generic views automatically change based on the permissions of the
 current user.
 
-#### The administrator role
+### The administrator role
 
 By default, permissions for categories are defined like this:
 
@@ -151,6 +153,26 @@ The app is looking pretty good now, despite the fact we haven't done any work at
 
 ## Annotating The Model
 
+### Specifying the creator
+
+By annotating an association we can specify the creator model. For example, "users" create "adverts".
+
+In `app/models/advert.rb`, change `belongs_to :user` to
+
+    belongs_to :user, :creator => true
+{: .ruby}
+
+This special association is picked up by Hobo's generic tags in several places. For example on an advert show page the creator is now displayed in the heading.
+
+#### Before
+
+<img src="/images/tutorial/creator_before.png">
+
+#### After
+
+<img src="/images/tutorial/creator_after.png">
+
+
 ### Model Hierarchy
 
 **NOTE: These ideas are very experimental! They might change in a future Hobo release.**
@@ -206,10 +228,12 @@ File: `app/controllers/adverts_controller.rb`
       auto_actions :all
 
     end
+{: .ruby}
     
 There's a couple of things to note here. Firstly, the `hobo_model_controller` declaration upgrades this controller with Hobo features. We could specify the model that this controller looks after by passing the model to `hobo_model_controller`:
 
     hobo_model_controller Advert
+{: .ruby}
     
 But we don't need to because by default Hobo infers the model from the name of the controller class.
 
@@ -220,6 +244,7 @@ The `auto_actions` declaration can be given an `:except` clause to eliminate spe
 File: `app/controllers/adverts_controller.rb`
 
     auto_actions :all, :except => :index
+{: .ruby}
     
 and then refreshing the browser. You should see the "Adverts" link disappear from the main nav (and from the front page too).
 
@@ -234,8 +259,18 @@ Step one is to remove the "New Category" page. Modify the `auto_actions` in the 
 File: `app/controllers/categories_controller.rb`
 
     auto_actions :all, :except => :new
+{: .ruby}
     
 There is no step two :-) The automatic index page detects the absence of a new page and gives us an in-line form.
+You'll need to restart the server for this change to take affect because Hobo's automatic routes are only loaded at
+start time, even in development mode.
+
+The categories index page should now look like this:
+
+<img src="/images/tutorial/removing_new_page.png"/>
+
+
+---
 
 ### Moving on
 
