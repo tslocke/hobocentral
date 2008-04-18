@@ -82,18 +82,15 @@ Let's review what we want this app to do:
 
 Sounds to me like we just designed our models. We'll need:
 
- * Project (with a name)
+ * `Project` (with a name)
 	has many stories
-	
- * Story (with a title, description and status)
+ * `Story` (with a title, description and status)
 	belongs to a project
 	has many tasks
-	
- * Task (with a description)
+ * `Task` (with a description)
 	belongs to a story
 	has many users (through task-assignments)
-	
- * User (we'll stick with the standard fields provided by Hobo)
+ * `User` (we'll stick with the standard fields provided by Hobo)
 	has many tasks (through task-assignments)
 	
 Hopefully the connection between the goal and those models is clear. If not, you'll probably find it gets easier once you've done it a few times. Before long you'll be throwing models into your app without even stopping to write the names down. Of course -- chances are you've got something wrong, made a bad decision. So? Just throw them away and create some new ones when the time comes. We're sketching here!
@@ -105,10 +102,62 @@ Here's how we create these with a Hobo generator:
 	$ ./script/generate hobo_model_resource task    description:string
 	$ ./script/generate hobo_model_resource task_assignment
 	
-The field declarations have been created by the generators, but not the associations. Go ahead and edit the associations in the models to reflect the description above. Don't forget
+The field declarations have been created by the generators, but not the associations. Go ahead and edit the associations in the models to reflect the description above. 
 
- * `:dependent => :destroy` declarations where needed (probably all the `has_many` associations)
- * `belongs_to :user` and `belongs_to :task` on TaskAssignment
+The associations go just below the `fields do ... end` declaration in each model.
+
+#### `app/models/project.rb`
+
+    class Project < ActiveRecord::Base
+      ...
+      has_many :stories, :dependent => :destroy
+      ...
+    end
+{: .ruby}
+    
+### `app/models/story.rb`
+
+    class Story < ActiveRecord::Base
+      ...
+      belongs_to :project
+      belongs_to :status, :class_name => "StoryStatus", :foreign_key => "status_id"
+      
+      has_many :tasks, :order => 'position', :dependent => :destroy
+      ...
+    end
+{: .ruby}
+
+### `app/models/task.rb`
+
+    class Task < ActiveRecord::Base
+      ...
+      belongs_to :story
+
+      has_many :task_assignments, :dependent => :destroy
+      has_many :users, :through => :task_assignments, :managed => true
+      ...
+    end
+{: .ruby}
+
+### `app/models/task_assignment.rb`
+
+    class TaskAssignment < ActiveRecord::Base
+      ...
+      belongs_to :user
+      belongs_to :task
+      ...
+    end
+{: .ruby}
+
+### `app/models/user.rb`
+
+    class User < ActiveRecord::Base
+      ...
+      has_many :task_assignments, :dependent => :destroy
+      has_many :tasks, :through => :task_assignments
+      ...
+    end
+{: .ruby}
 
 Now watch how Hobo can create a single migration for all of these:
 
