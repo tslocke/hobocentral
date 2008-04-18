@@ -291,7 +291,7 @@ As with `hobo_index` a typical use would be to pass `:include` to do eager loadi
 
 `hobo_create` will instantiate the model, or take the first argument if you provide one.
 
-The attributes hash for this new record are found either from the option `:attributes` if you passed one, or from the conventional parameter that matches the model name (e.g. params[:advert]).
+The attributes hash for this new record are found either from the option `:attributes` if you passed one, or from the conventional parameter that matches the model name (e.g. `params[:advert]`).
 
 The update to the new record with these attributes is performed like this:
 
