@@ -1,6 +1,23 @@
-# Model Layer
+# Part 2 -- Customizing the App
 
-## Adding permissions
+In a short space of time, you have created a working app. Some parts of the generic app might
+already be quite close to what you want, other parts will not. Now it is time to begin customizing
+the app to your needs. 
+
+Your initial inclination might be to dive in to `app/views` and start modifying the individual 
+page views. However, you will soon find that initially there are very few files for the individual 
+pages in the generic app. With the exception of the front page, Hobo doesn't generate the generic views in your app. They are being rendered using a set of generic page tags provided by the Hobo Rapid library. DRYML allows these page tags to be customized in powerful ways without having to re-define parts of the page that you don't want to change. 
+
+But before we dive into DRYML we can change the behavior of the generated UI in several ways by making changes to our models and controllers, and these are a good place to start.
+
+1. [Model Layer](#model-layer)
+2. [Resource Controllers](#resource-controllers)
+
+---
+
+## <a name="model-layer">Model Layer</a>
+
+### Adding permissions
 
 Hobo's model level permissions are a good place to start when customizing your app. Although
 they are designed to give you model level integrity they are also used by many of Hobo Rapid's
@@ -52,7 +69,7 @@ If you log out and then sign up as another user, that user will not be automatic
 
 It is worth noting that although Hobo introduces the concept of an administrator you are free to ignore it or change it in any way to suite your needs. You can redefine `administrator?` in your user model to anything you like, replace it with a role-based permission system, or remove it entirely.
 
-## Allowing logged in users to create and update a model
+### Allowing logged in users to create and update a model
 
 As described above the default permissions allow anyone to view a particular model and only an administrator to create, update and delete. In our Pod app, we would like any registered user to be able to create, update and delete their own adverts. To do this, we begin by modifying the advert model permissions as follows:
 
@@ -136,6 +153,26 @@ The app is looking pretty good now, despite the fact we haven't done any work at
 
 ## Annotating The Model
 
+### Specifying the creator
+
+By annotating an association we can specify the creator model. For example, "users" create "adverts".
+
+In `app/models/advert.rb`, change `belongs_to :user` to
+
+    belongs_to :user, :creator => true
+{: .ruby}
+
+This special association is picked up by Hobo's generic tags in several places. For example on an advert show page the creator is now displayed in the heading.
+
+#### Before
+
+<img src="/images/tutorial/creator_before.png">
+
+#### After
+
+<img src="/images/tutorial/creator_after.png">
+
+
 ### Model Hierarchy
 
 **NOTE: These ideas are very experimental! They might change in a future Hobo release.**
@@ -170,4 +207,73 @@ If you click on one of the user links in the app, you should now see that all of
 
 We're now going to move on and look at customising the controllers. These automatic pages have some more smarts that respond to controller-level configuration, so we'll be able to improve the UI still more with just a few declarative changes.
 
-Next: [Resource Controllers](/pod-tutorial/2-2-resource-controllers)
+----
+
+## <a name="resource-controllers">Customizing controllers</a>
+
+In this  chapter we'll make a few small controller changes and see how the automatic pages respond to give us a still more tailored UI.
+
+### Removing an 'index' page
+
+The front page and main nav bar decide which models to show based on the presence of an index page, or, more accurately an index *route*. For example, "Adverts" appears in the main nav because the route `/adverts` exists. If we decided we only wanted adverts to be reachable via their categories, that route would not be needed.
+
+Hobo generates routes automatically by inspecting the controllers. Here's what the adverts controller looks like:
+
+File: `app/controllers/adverts_controller.rb`
+
+    class AdvertsController < ApplicationController
+
+      hobo_model_controller
+
+      auto_actions :all
+
+    end
+{: .ruby}
+    
+There's a couple of things to note here. Firstly, the `hobo_model_controller` declaration upgrades this controller with Hobo features. We could specify the model that this controller looks after by passing the model to `hobo_model_controller`:
+
+    hobo_model_controller Advert
+{: .ruby}
+    
+But we don't need to because by default Hobo infers the model from the name of the controller class.
+
+The line `auto_actions :all` causes the standard set of RESTful actions to be added to our class: index, show, edit, create, update and destroy (if the model had any `has_many` associations there would be some actions created for those too).
+
+The `auto_actions` declaration can be given an `:except` clause to eliminate specific actions. Try modifying that line to:
+
+File: `app/controllers/adverts_controller.rb`
+
+    auto_actions :all, :except => :index
+{: .ruby}
+    
+and then refreshing the browser. You should see the "Adverts" link disappear from the main nav (and from the front page too).
+
+### Removing a 'new' page
+
+Make sure you're logged in to the app as 'admin', and click on "Categories" in the nav-bar. You'll see a "New Category" link at the bottom of the page. That leads to a page with a simple form for creating a new category.
+
+The "New Category" page is a bit overkill -- a whole page for a form with a single field? It might be better to have an inline form on the main "Categories" page.
+
+Step one is to remove the "New Category" page. Modify the `auto_actions` in the Categories controller, much as we did with the Adverts controller:
+
+File: `app/controllers/categories_controller.rb`
+
+    auto_actions :all, :except => :new
+{: .ruby}
+    
+There is no step two :-) The automatic index page detects the absence of a new page and gives us an in-line form.
+You'll need to restart the server for this change to take affect because Hobo's automatic routes are only loaded at
+start time, even in development mode.
+
+The categories index page should now look like this:
+
+<img src="/images/tutorial/removing_new_page.png"/>
+
+
+---
+
+### Moving on
+
+OK that's probably about as far as we can go with refining this app while sticking with the fully automatic UI. If this app was expected to have a short life-span or small number of users, you might well decide that the current UI is good enough. Congratulations! You just created a finished web-app with just a handful of lines of code. For apps that you want to take up a level though, you're going to want to hand-tailor the UI. That's where DRYML comes in, which is the topic of the next chapter.
+
+Next: [Part 3 - Customizing Views with DRYML](/pod-tutorial/3-customizing-views-with-dryml)
