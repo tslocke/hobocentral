@@ -2,6 +2,8 @@
 
 **NOTE: This is the tutorial that was recently delivered at the Ruby Fools conference in Copenhagen. It hasn't been properly chapterised for the web yet.**
 
+The full source code for the Agility app is available [here](http://github.com/tablatom/agility/tree/master).
+
 In this tutorial we'll be creating a simple "Agile Development" application -- _Agillity_. The application tracks projects which consist of a number of user stories. Stories have a status (e.g. accepted, under development...) as well as a number of associated tasks. Tasks can be assigned to users, and each user can see a heads-up of all the tasks they've been assigned to on their home page.
 
 This is a bit of an in-at-the-deep-end tutorial -- we build the app the way you would assuming you had already got the hang of the way Hobo works. In the later stages new concepts start coming thick and fast. The goal here is to show you what's possible, and give you a flavour of Hobo-style application development, rather that to provide detailed background on how everything workds. Don't worry about it, it's fun! If you'd rather take things a bit slower, you might prefer the [POD tutorial](http://hobocentral.net/pod-tutorial).
@@ -14,7 +16,7 @@ This is a bit of an in-at-the-deep-end tutorial -- we build the app the way you 
 
 Hobo is a bunch of extensions to Ruby on Rails that are designed to make developing any kind of web application a good deal faster and more fun. This tutorial is designed to show off Hobo's ability to get quite sophisticated applications up and running extremely quickly. 
 
-While Hobo is very well suited to this kind of throw-it-together-in-an-afternoon application, it is equally useful for longer term projects, where the end result needs to be very meticulously crafted to the needs of its users. Hopefully the tutorial will give you an idea of how to take your Hobo/Rails application much further.µ
+While Hobo is very well suited to this kind of throw-it-together-in-an-afternoon application, it is equally useful for longer term projects, where the end result needs to be very meticulously crafted to the needs of its users. Hopefully the tutorial will give you an idea of how to take your Hobo/Rails application much further.
 
 For more info on Hobo please see [hobocentral.net](http://hobocentral.net)
 
@@ -128,30 +130,36 @@ There's an interesting change of approach here that often crops up with Hobo dev
 Taking that example -- removing the index action from TasksController, here's how we'd do that. in `app/controllers/tasks_controller.rb`, change 
 
 	auto_actions :all
+{: .ruby}
 	
 To
 
 	auto_actions all, :except => :index
+{: .ruby}
 	
 Restart the server and you'll notice that Tasks has been removed from the main nav-bar. Hobo's generic pages (which are just clever defaults that you can override as much or as little as you like) know how to adapt to changes in the actions that you make available.
 
 Here's another similar trick. Browse to one of your stories. See that "New Task" link at the bottom? That's kind of clunky for the user -- it would be much nicer if the new task form (which only has one field after all) was in-line in the same page. Edit the `auto_actions` declaration in `stories_controller` to look like this:
 
 	auto_actions :all, :except => :new_task
+{: .ruby}
 	
 Restart the server and refresh the story page. Ta da!
 	
 So far we've seen the black-list style where you list what you *don't* want. There's also white-list style where you list what you do want, e.g.
 
     auto_actions :index, :show
+{: .ruby}
 
 There's also a handy shortcut to get just the read-only routes (i.e. the ones that don't modify the database)
 
 	auto_actions :read_only
+{: .ruby}
 	
 The opposite is handy for things that are manipulated by ajax but never viewed directly:
 
 	auto_actions :write_only
+{: .ruby}
 
 Work through your controllers and have a think about which actions you want. You might end up with something like:
 
@@ -194,6 +202,7 @@ A permission that says "only logged in users" looks like this:
 	def creatable_by?(user)
 	  !user.guest?
 	end
+{: .ruby}
 	
 You might need to sign up a new user so you've got a non-admin to test things with.
 
@@ -210,6 +219,7 @@ The permissions system is not just for opening operations for some users but not
 	def updatable_by?(user, new)
 	  !user.guest? && same_fields?(new, :project)
 	end
+{: .ruby}
 
 Note that the `updatable_by?` method is called with `self` in the current state, and the `new` argument is an instance of the same class in the proposed new state. The `same_fields?` helper is a convenient way to assert that certain fields have not been changed. There's also `only_changed_fields?` which is more convenient if you want to prevent changes to all but a certain few fields.
 
@@ -225,11 +235,13 @@ Sometimes however, Hobo can't figure out edit permission unless you tell it expl
 	
 	def users_editable_by?(user)
       !user.guest?
-    end
+  end
+{: .ruby}
   
 We also need to tell Hobo that it's ok for the TaskAssigment objects can be created and deleted automatically as a side effect of saving changes to the Task. Change the `has_many :users` declaration in `task.rb` to:
 
 	has_many :users, :through => :task_assignments, :managed => true
+{: .ruby}
   
 You should now get a nice javascript powered control for assigning users in the edit-task page.
 
@@ -262,6 +274,7 @@ The file `app/views/taglibs/application.dryml` is a place to put tag definitions
 	    </creation-details:>
 	  </base-card>
 	</def>
+{: .dryml}
 	
 OK there's a lot of new concepts thrown at you at once there :-) 
 	
@@ -286,6 +299,7 @@ If you now edit `show.dryml` to read "`<show-page>`" you'll see we're back where
 	<show-page>
 	  <content-body:>Hello</content-body:>
 	</show-page>
+{: .dryml}
 	
 The "Hello" message is back, but now it's embedded in the properly marked-up page. We've used the named parameter 'content-body', which is provided by the definition of `<show-page>` in Rapid.
 
@@ -300,7 +314,8 @@ Now let's get the content we're after - the user's assigned tasks, grouped by st
 	    </repeat>
 	  </content-body:>
 	</show-page>
-	
+{: .dryml}
+
 Again - lots of new stuff there. Let's quickly run over what's going on
 
  * The `<Your>` tag is a handy little gadget. It outputs "Your" if the context is the current user, otherwise it outputs the user's name. You'll see "Your Assigned Tasks" when looking at yourself, and "Fred's Assigned Tasks" when you're looking at Fred.
@@ -332,6 +347,7 @@ As an experiment, try this:
 	    <repeat join=", "><a/></repeat>
 	  </primary-collection:>
 	</show-page>
+{: .dryml}
 	
 You should now see that in place of the story cards, we now get a simple comma-separated list of links to the stories. Not what we want of course, but it illustrates the concept of overriding the primary-collection. We didn't even have to set the context because it's already set to the collection by `<show-page>`
 
@@ -344,7 +360,8 @@ Here's how we get the table-plus:
 	    </table-plus>
 	  </primary-collection:>
 	</show-page>
-	
+{: .dryml}
+
 The `fields` attribute to `<table-plus>` lets you specify a list of fields that will become the columns in the table. We could have said `fields="title, status"` which would have given us the same content in the table, but by saying `this`, the first column contains links to the stories, rather than just the title as text.
 
 Now for the controller side. Add a `show` method to `app/controllers/projects_controller.rb` like this:
@@ -355,6 +372,7 @@ Now for the controller side. Add a `show` method to `app/controllers/projects_co
 	    @project.stories.apply_scopes(:search    => [params[:search], :title],
 	                                  :order_by  => parse_sort_param(:title, :status))
 	end
+{: .ruby}
 	
 (To do -- explain how that works!)
 	
@@ -379,16 +397,19 @@ We're going to do this in two stages - first a fixed menu that requires a source
 The fixed menu is brain-dead simple. Track down the declaration of the status field in `story.rb` (it's in the `fields do ... end` block), and change it to read something like:
 
 	status enum_string(:new, :accepted, :discussion, :implementation, :user_testing, :deployed, :rejected)
+{: .ruby}
 	
 Job done. If you want the gory details, `enum_string` is a *type constructor*. It creates an anonymous class that represents this enumerated type (a subclass of String). You can see this in action by trying this in the console:
 
 	>>> Story.find(:first).status.class
+{: .ruby}
 
 The menu is working in the edit-story page now. It would be nice though if we had a ajaxified editor right on the story page. Edit `app/views/stories/show.dryml` to be:
 
 	<show-page>
 	  <field-list: tag="editor"/>
 	</show-page>
+{: .dryml}
 	
 What did that do? `<show-page>` uses a tag `<field-list>` to render a table of fields. DRYML's parameter mechanism allows the caller to customize the parameters that are passed to `<field-list>`. On our story page the field-list contains only the status field. By default `<field-list>` uses the `<view>` tag to render read-only views of the fields, but that can be changed by passing a tag name to the `tag` attribute. We're passing `editor` which is a tag for creating ajax-style in-place editors. 
 	
@@ -402,10 +423,12 @@ In order to support management of the statuses available, we'll create a StorySt
 Whenever you create a new model + controller with Hobo, get into the habit of thinking about permissions and controller actions. In this case, we probably want only admins to be able to manage the permissions. As for actions, we probably only want the write actions, and the index page:
 
 	auto_actions :write_only, :index
+{: .ruby}
 	
 Next step, we can remove the 'status' field from the Story model, and instead add an association with the StoryStatus model:
 
 	belongs_to :status, :class_name => "StoryStatus"
+{: .ruby}
 	
 Now run the migration generator
 
@@ -434,12 +457,14 @@ First we'll add the filter control to the header of the table-plus. Rapid provid
 	  </prepend-header:>
 	  <empty-message:>No stoires match your criteria</empty-message:>
 	</table-plus>
+{: .dryml}
 	
 If you try to use the filter, you'll see it adds a `status` parameter in the query string. We need to pick that up and do something useful with it in the controller. We can use the `apply_scopes` method again, which is already being used, so it's just a matter of adding one more keyword argument:
 
 Needs support in the controller. Add this option to `apply_scopes`:
 
 	:status_is => params[:status]
+{: .ruby}
 	
 Status filtering should now be working.
 
@@ -470,6 +495,7 @@ For the new form, we actually don't ever want the position to be set when the ta
 	def creatable_by?(user)
 	  !user.guest? && position.nil?
 	end
+{: .ruby}
 	
 When it comes to updating the task, we don't want to ban updates to the position field, or drag-and-drop re-ordering will be prevented too. So it's really just a UI issue -- we'll do the fix in the view layer. 
 
@@ -478,7 +504,7 @@ Create a custom `app/views/tasks/edit.dryml` like this.
 	<edit-page>
 	  <field-list: skip="position"/>
 	</edit-page>
-
+{: .dryml}
 	
 # Markdown / Textile formatting of stories
 
@@ -487,10 +513,12 @@ We'll wrap up with a really easy one. Hobo renders model fields based on their t
 Location the `fields do ... end` section in the Story model, and change
 
 	body :text
+{: .ruby}
 	
 To 
 
 	body :markdown # or :textile
+{: .ruby}
 
 You may need to install the relevant ruby gem: either BlueCloth (markdown) or RedCloth (textile)
 
@@ -511,18 +539,3 @@ A pretty obvious addition is to have project milestones, and be able to associat
 ## Add comments to stories
 
 It's always useful to be able to have a discussion around things, and a trail of comments is a nice easy way to support this.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
