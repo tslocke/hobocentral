@@ -5,6 +5,15 @@ A sub-site is part of a web-app that has the appearance and behavior of a separa
 common example of a sub-site is an "admin" section. This guide shows how to create a typical
 admin sub-site in Hobo.
 
+The typical approach to creating a sub-site is to duplicate the required model controllers. So you
+might have a public facing view of the users at `/users` and the administrators view of the same
+model at `/admin/users`. These would be managed by two distinct controllers, each with their own
+set of enabled actions which might not necessarily be the same. For example the admin users controller
+might have a "new" action at `/admin/users/new`, while the public facing users controller might
+not enable this action at all if it isn't appropriate.
+
+### Step by Step
+
 At the time of writing, Hobo's generators are unable to generate sub-site controllers so it is 
 necessary to create the files manually.
 
@@ -52,6 +61,9 @@ Add a route for the home page of the sub-site in `config/routes.rb`:
 
     map.admin  'admin', :controller => 'admin/admin', :action => 'index'
 {: .ruby}
+
+This will enable the route `/admin` which will redirect automatically to
+`/admin/users` as we set up above.
 
 In the base controller we wrote `include_taglib 'admin'`. This means that the tags
 in `app/views/taglibs/admin.dryml` will be loaded for every action in the sub-site.
