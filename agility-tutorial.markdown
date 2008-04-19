@@ -41,7 +41,7 @@ With Hobo, you get a bare-bones application immediately. Let's run it:
     $ cd agility
     $ ./script/server
 
-(Tip: Windows users: 1. Really? 2. Whenever you see `./script/something`, you will need to instead do `ruby script/something`)
+(Tip: Windows users: Whenever you see `./script/something`, you will need to instead do `ruby script/something`)
 
 If you try and sign up you'll see that part is not working yet - because we haven't created the `users` table. There's a good reason why the `hobo` command doesn't do that automatically but we'll gloss over that for now. To create the table, use Hobo's migration generator:
 
