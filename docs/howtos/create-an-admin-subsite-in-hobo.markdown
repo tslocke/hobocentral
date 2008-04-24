@@ -103,7 +103,7 @@ to `admin.dryml` we can replace the normal list on an index page with an admin s
     <def tag="index-page" extend-with="admin">
       <index-page-without-admin merge>
         <collection: replace>
-          <table-plus fields="username, administrator" param/>
+          <table-plus fields="this" param/>
         </collection:>
       </index-page-without-admin>
     </def>
@@ -112,3 +112,38 @@ to `admin.dryml` we can replace the normal list on an index page with an admin s
 If we add additional model controllers to the admin sub-site they will all use this modified
 version of `<index-page>`. Similar admin specific tweaks can be made to the other generic pages
 and tags.
+
+Notice the `fields` attribute on `<table-plus>`. This attribute is given a list of fields that will appear as columns in the table. Our shared definition of `<index-page>` can't put anything model-specific in there, so we just use "this" which will give a single column with links to each show-page. The good thing is that it's easy to customise this for specific models. For example, say we'd like to add an `email_address` column for the `User` model, just create `app/views/admin/users/index.dryml` like this:
+
+	<index-page>
+	  <table-plus: fields="this, email_address"/>
+	</index-page>
+{: .dryml}
+	
+Notice that the call to `<index-page>` picks up our customised version, since we've overridden it for the entire admin sub-site.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

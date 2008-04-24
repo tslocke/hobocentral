@@ -120,9 +120,8 @@ The associations go just below the `fields do ... end` declaration in each model
     class Story < ActiveRecord::Base
       ...
       belongs_to :project
-      belongs_to :status, :class_name => "StoryStatus", :foreign_key => "status_id"
       
-      has_many :tasks, :order => 'position', :dependent => :destroy
+      has_many :tasks, :dependent => :destroy
       ...
     end
 {: .ruby}
