@@ -182,7 +182,7 @@ Taking that example -- removing the index action from TasksController, here's ho
 	
 To
 
-	auto_actions all, :except => :index
+	auto_actions :all, :except => :index
 {: .ruby}
 	
 Restart the server and you'll notice that Tasks has been removed from the main nav-bar. Hobo's generic pages (which are just clever defaults that you can override as much or as little as you like) know how to adapt to changes in the actions that you make available.
