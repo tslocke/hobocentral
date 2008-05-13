@@ -282,7 +282,7 @@ One permission method that is not present by default is`editable_by?`. This meth
 Sometimes however, Hobo can't figure out edit permission unless you tell it explicitly. A common example is `has_many` associations. If you don't specify edit permission for these, Hobo just defaults to not-editable. That's why, up until now, the task assignments are completely absent from the UI. We can fix that by adding this to `task.rb`:
 	
 	def users_editable_by?(user)
-      !user.guest?
+    !user.guest?
   end
 {: .ruby}
   
