@@ -414,7 +414,7 @@ The `fields` attribute to `<table-plus>` lets you specify a list of fields that 
 
 We could also add a column showing the number of tasks in a story. Change to `fields="this, tasks.count, status"` and see that a column is added with a readable title "Tasks Count".
 
-Now for the controller side. Add a `show` method to `app/controllers/projects_controller.rb` like this:
+To enable the 'Search' feature of the table, we need to update the controller side. Add a `show` method to `app/controllers/projects_controller.rb` like this:
 	
 	def	show
 	  @project = find_instance
@@ -428,7 +428,7 @@ Now for the controller side. Add a `show` method to `app/controllers/projects_co
 	
 # Part 5 -- odds and ends
 
-We're now going to work through some more easy but very valuable enhancements to the app. We're going to add
+We're now going to work through some more easy but very valuable enhancements to the app. We're going to add:
 
  * A menu for story statuses. The free-form text field is a bit poor after all. We'll do this first with a hard-wired set of options, and then add the ability to manage the set of available statuses.
 
