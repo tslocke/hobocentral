@@ -404,7 +404,7 @@ Here's how we get the table-plus:
 	<show-page>
 	  <primary-collection:>
 	    <table-plus fields="this, status">
-	      <empty-message:>No stoires match your criteria</empty-message:>
+	      <empty-message:>No stories match your criteria</empty-message:>
 	    </table-plus>
 	  </primary-collection:>
 	</show-page>
