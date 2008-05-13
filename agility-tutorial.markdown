@@ -489,7 +489,14 @@ adding another, or if you are renaming the old column. It's also pretty fussy ab
 
 Once you've done that you'll see that the generated migration includes the creation of the new foreign key and the removal of the old status column. If you wanted to do something clever with the existing status values you're free to edit the migration and add some data processing before you run it.
 
-That's it. The page to manage the story statuses should appear in the main navigation.
+For example, within your migration, console or a rake task, you could create some initial story statuses
+
+  [:new, :accepted, :discussion, :implementation, :user_testing, :deployed, :rejected].each do |status| 
+    StoryStatus.create :name => status.to_s
+  end
+{: .ruby}
+
+That's it. The page to manage the story statuses should appear in the main navigation once you restart your server.
 
 Now that we've got more structured statuses, let's do something with them...
 
