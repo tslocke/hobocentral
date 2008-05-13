@@ -412,6 +412,8 @@ Here's how we get the table-plus:
 
 The `fields` attribute to `<table-plus>` lets you specify a list of fields that will become the columns in the table. We could have said `fields="title, status"` which would have given us the same content in the table, but by saying `this`, the first column contains links to the stories, rather than just the title as text.
 
+We could also add a column showing the number of tasks in a story. Change to `fields="this, tasks.count, status"` and see that a column is added with a readable title "Tasks Count".
+
 Now for the controller side. Add a `show` method to `app/controllers/projects_controller.rb` like this:
 	
 	def	show
