@@ -491,9 +491,10 @@ Once you've done that you'll see that the generated migration includes the creat
 
 For example, within your migration, console or a rake task, you could create some initial story statuses
 
-  [:new, :accepted, :discussion, :implementation, :user_testing, :deployed, :rejected].each do |status| 
-    StoryStatus.create :name => status.to_s
-  end
+    [:new, :accepted, :discussion, :implementation,
+     :user_testing, :deployed, :rejected].each do |status| 
+      StoryStatus.create :name => status.to_s
+    end
 {: .ruby}
 
 That's it. The page to manage the story statuses should appear in the main navigation once you restart your server.
