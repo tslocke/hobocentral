@@ -2,13 +2,13 @@
 
 Hobo is an open project -- please do get involved.
 
-We have [forums/mailing-lists](/forum), an IRC channel (#hobo on freenode), and a [public issue tracker](http://hobo.lighthouseapp.com/dashboard) (using Lighthouse). You can browse the source and track changes at [GitHub](http://github.com/tablatom). GitHub also provides wikis for each sub-project
+We have [forums/mailing-lists](http://groups.google.com/group/hobousers), an IRC channel (#hobo on freenode), and a [public issue tracker](http://hobo.lighthouseapp.com/dashboard) (using Lighthouse). You can browse the source and track changes at [GitHub](http://github.com/tablatom). GitHub also provides wikis for each sub-project
 
 ## Forums
 
 We are running a combined mailing-list / web forum system. 
-
-* [Visit the forums](/forum)
+* [Visit the forums](http://groups.google.com/group/hobousers)
+* [Archive of the old forums](/forum)
 
 ## Bug Reporting & Enhancement Requests
 
