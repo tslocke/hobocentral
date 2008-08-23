@@ -1,3 +1,7 @@
+# NOTE
+
+> The tutorial has been partially updated to work with Hobo 0.8 pre 1. The end of the updated content is marked below with a note like this one.
+
 # Hobo Tutorial -- Agility
 
 The full source code for the Agility app is available at [http://github.com/tablatom/agility](http://github.com/tablatom/agility/tree/master).
@@ -36,13 +40,13 @@ The `hobo` command is like the Rails command, it will create a new blank Rails a
 
 With Hobo, you get a bare-bones application immediately. Let's create the database and then run the app. We first need to use the migration generator to create the basic database:
 
+    $ cd agility
     $ ./script/generate hobo_migration
 
 (Tip: Windows users: Whenever you see `./script/something`, you will need to instead do `ruby script/something`)
 
 Respond to the prompt with `m` and then give the migration a name. Then:
 
-    $ cd agility
     $ ./script/server
 
 You should be able to sign up. In the next section we'll be starting to flesh out the basics of the app.
@@ -92,7 +96,10 @@ Here's how we create these with a Hobo generator:
 	$ ./script/generate hobo_model_resource project name:string
 	$ ./script/generate hobo_model_resource story   title:string body:text status:string
 	$ ./script/generate hobo_model_resource task    description:string
-	$ ./script/generate hobo_model_resource task_assignment
+	
+Task assignments are just a back-end model. They don't need a controller, so:
+	
+	$ ./script/generate hobo_model task_assignment
 	
 The field declarations have been created by the generators, but not the associations. Go ahead and add the associations, just below the `fields do ... end` declaration in each model, as follows:
 
@@ -152,16 +159,14 @@ Now watch how Hobo can create a single migration for all of these:
 
 	$ ./script/generate hobo_migration
 	
-Note: Hobo's automatic routing happens when the application starts. You'll need to stop and start the web-server in order for the application to reflect all these new models and controllers.
-	
-Fire up the app. It's kind of a weird UI at this stage, but we do actually have a working application. Make sure you are logged in as an administrator (e.g. the user who signed up first), and spend a few minutes populating the app with projects, stories and tasks. 
+Fire up the app. It's not a polished UI of course, but we do actually have a working application. Make sure you are logged in as an administrator (e.g. the user who signed up first), and spend a few minutes populating the app with projects, stories and tasks. 
 
 With some more very simple changes, and without even touching the views, we can get surprisingly close to a decent UI.
 
 
 # Part 2 -- Removing actions
 
-By default Hobo has given us a full set of restful actions for every single model/controller pair. Many of these routes are inappropriate for our application. For example, why would be want an index page listing every Task in the database? We only really want to see tasks listed against stories and users. We need to disable the routes we don't want.
+By default Hobo has given us a full set of restful actions for every single model/controller pair. Many of these routes are inappropriate for our application. For example, why would we want an index page listing every Task in the database? We only really want to see tasks listed against stories and users. We need to disable the routes we don't want.
 
 There's an interesting change of approach here that often crops up with Hobo development. Normally you'd expect to have to build everything yourself. With Hobo, you often get given everything you want and more besides. Your job is to take away the parts that you *don't* want.
 
@@ -177,14 +182,30 @@ To
 	
 Restart the server and you'll notice that Tasks has been removed from the main nav-bar. Hobo's generic pages (which are just clever defaults that you can override as much or as little as you like) know how to adapt to changes in the actions that you make available.
 
-Here's another similar trick. Browse to one of your stories. See that "New Task" link at the bottom? That's kind of clunky for the user -- it would be much nicer if the new task form (which only has one field after all) was in-line in the same page. Edit the `auto_actions` declaration in `stories_controller.rb` to look like this:
+Here's another similar trick. Browse to one of your projects. You'll see the page says "No stories to display" but there's no way to add one. Hobo has support for this but we need to switch it on. Add the following declaration to the stories controller:
 
-	auto_actions :all, :except => :new_task
+    auto_actions_for :project, [:new, :create]
+    
+This creates nested routes and their corresponding actions:
+
+ - `/project/123/stories/new` routed to `StoriesController#new_for_project`
+ - `/project/123/stories` (POST) routed to `StoriesController#create_for_project`
+ 
+Hobo's page generators will respond to the existence of these routes and add a "New Story" link to the project page, and an appropriate "New Story" page.
+
+Create a story and you'll see the story has the same issue with it's task - there's no way to create one. Again we can add the `auto_actions_for` declaration to the tasks controller, but this time we'll only ask for a `create` action and not a `new` action:
+
+    auto_actions_for :project, :create
 {: .ruby}
-	
-Restart the server and refresh the story page. Ta da!
-	
-So far we've seen the black-list style where you list what you *don't* want. There's also white-list style where you list what you do want, e.g.
+    
+Hobo's page generator can cope with the lack of a 'New Task' page -- it gives you an in-line form on the story page.
+
+We'll now continue and configure the available actions for all of the controllers. So far we've seen the black-list style where you list what you *don't* want:
+
+	auto_actions :all, :except => :index
+{: .ruby}
+
+There's also white-list style where you list what you do want, e.g.
 
     auto_actions :index, :show
 {: .ruby}
@@ -201,17 +222,16 @@ The opposite is handy for things that are manipulated by ajax but never viewed d
 
 Work through your controllers and have a think about which actions you want. You need to end up with:
 
- * Projects: `:all`
- * Stories `:write_only, :show, :edit, :new, :create_task`
- * Tasks: `:write_only, :edit`
- * TaskAssignments: `:write_only` (or maybe we don't even need this controller?)
+ * Projects: `auto_actions :all`
+ * Stories `auto_actions :all, :except => :index`
+ * Tasks: `auto_actions :write_only, :edit`
 
-Have a play with the application with this set of actions in place (don't forget to restart the server). Looking pretty good!
+Have a play with the application with this set of actions in place. Looking pretty good!
 
 
 # Part 3 -- Permissions
 
-So far we've only done two things to are app: created some models & controllers, and specified which actions are available. There's one more thing we typically do when creating a new Hobo app, before we even touch the view layer. We modify permissions in the model layer.
+So far we've only done two things to our app: created some models & controllers, and specified which actions are available. There's one more thing we typically do when creating a new Hobo app, before we even touch the view layer. We modify permissions in the model layer.
 
 ## Introduction to permissions
 
@@ -224,11 +244,14 @@ You might have noticed methods like this one in the generated models:
 
 That tells Hobo that only administrators are allowed to create this kind of model. Before every create, update and delete (destroy) operation, Hobo calls one of these methods passing the current user. Only if the method returns true is the operation allowed to continue.
 
-Furthermore, the *Rapid* DRYML tag library (that's the part of Hobo that creates the UI automatically for you) knows how to interrogate the permissions and adapt accordingly. For example, Rapid won't generate a "New Project" link if the current user does not have permission to create a project.
+Furthermore, the *Rapid* DRYML tag library (that's the part of Hobo that creates the UI automatically for you) knows how to interrogate the permissions and adapt accordingly. For example, Rapid will only generate a "New Project" link if the current user has permission to create a project.
 
-You can see this feature in action by logging out and browsing around the app. You'll notice that all the 'new' and 'edit' links have disappeared. If you experiment by change `user.administrator?` to `true` in some permission methods, you'll see operations start to become available.
+You can see this feature in action by logging out and browsing around the app. You'll notice that all the 'new' and 'edit' links have disappeared. If you experiment by changing `user.administrator?` to `true` in some permission methods, you'll see operations start to become available.
 
-## Customize the permissions in Agility
+Tip: Hobo provides an easy way to switch user so you can see how things look to different people. In development mode you should see the change-user menu in the top-left.
+
+
+## Customise the permissions in Agility
 
 For the purposes of the tutorial you can make your own decisions about who should be allowed to do what. In the spirit of agile methods, we probably don't want to lock things down too much. Here's a suggestion:
 
@@ -244,23 +267,20 @@ A permission that says "only signed up users" looks like this:
 
 (There's also `user.guest?`)
 	
-You might need to sign up a new user so you've got a non-admin to test things with.
-
-Tip: Hobo provides an easy way to switch user so you can see how things look to different people. In development mode you should see the change-user menu in the top-left.
-
+You might need to sign up a new user so you've got a non-admin to test things with. 
 
 ## Permissions for data integrity
 
-The permissions system is not just for opening operations for some users but not others, it is also used to prevent operations that don't make sense for anyone. For example, you've probably noticed that the default UI allows stories to be moved from one project to another. That's arguably not a sensible operation for *anyone* to be doing. We can prevent it with this method in `story.rb`:
+The permissions system is not just for opening operations for some users but not others, it is also used to prevent operations that don't make sense for anyone. For example, you've probably noticed that the default UI allows stories to be moved from one project to another. That's arguably not a sensible operation for *anyone* to be doing. Before we fix this, browse to an "Edit Story" page and notice the menu that lets you chose a different project. Now prevent the project from changing with this method in `story.rb`:
 
 	def updatable_by?(user, new)
 	  user.signed_up? && same_fields?(new, :project)
 	end
 {: .ruby}
 
-The `updatable_by?` method has a parameter: `new`. This is a duplicate instance of `self` with the proposed changes applied. So for example, if you wanted to know if the user is clearing the association to the project, you could test for `new.project.nil?`. The `same_fields?` helper is a convenient way to assert that certain fields have not been changed. There's also `only_changed_fields?` which is more convenient if you want to prevent changes to all but a certain few fields.
+Refresh the browser and you'll see that menu removed from the form automatically. 
 
-Rapid will respond to this change by removing the project selector from the edit-story page.
+The `updatable_by?` method has a parameter: `new`. This is a duplicate instance of `self` with the proposed changes applied. So for example, if you wanted to know if the user is clearing the association to the project, you could test for `new.project.nil?`. The `same_fields?` helper is a convenient way to assert that certain fields have not been changed. There's also `only_changed_fields?` which is more convenient if you want to prevent changes to all but a certain few fields.
 
 Make a similar change to prevent tasks being moved from one story to another.
 
@@ -274,12 +294,7 @@ Sometimes however, Hobo can't figure out edit permission unless you tell it expl
       user.signed_up?
     end
 {: .ruby}
-  
-We also need to tell Hobo that it's ok for the TaskAssigment objects can be created and deleted automatically as a side effect of saving changes to the Task. Change the `has_many :users` declaration in `task.rb` to:
-
-	has_many :users, :through => :task_assignments, :managed => true
-{: .ruby}
-  
+    
 You should now get a nice javascript powered control for assigning users in the edit-task page.
 
 
@@ -302,20 +317,26 @@ DRYML has a feature called *polymorphic tags*. These are tags that are defined d
 
 The file `app/views/taglibs/application.dryml` is a place to put tag definitions that will be available throughout the site. Add this definition to that file:
 
-	<def tag="card" for="Task">
-	  <base-card merge>
-	    <creation-details: replace>
-	      <div class="users">
-	        Assigned users: <repeat:users join=", "><a/></repeat><else>None</else>
-	      </div>
-	    </creation-details:>
-	  </base-card>
-	</def>
+    <extend tag="card" for="Task">
+      <old-card merge>
+        <append-body:>
+          <div class="users">
+            Assigned users: <repeat:users join=", "><a/></repeat><else>None</else>
+          </div>
+        </append-body:>
+      </old-card>
+    </extend>
 {: .dryml}
 	
 OK there's a lot of new concepts thrown at you at once there :-) 
 	
-First off, refresh the story page. You'll see that in the cards for each task, we've replaced the creation time and date (which we don't really want to see) with the list of assigned users. The users are clickable - they link to each users home page (which doesn't have much on it at the moment).
+First off, refresh the story page. You'll see that in the cards for each task there is now a list of assigned users. The users are clickable - they link to each users home page (which doesn't have much on it at the moment).
+
+The `<extend>` tag is used to extend any tag that's already defined. The body of `<extend>` is our new definition. It's very common to want to base the new definition on the old one, e.g. just inserting a bit of extra content as we've done here. We can do that by calling the "old" definition, which is available as `<old-card>`.
+    
+# NOTE
+
+> The content below here has *not* been updated for Hobo 0.8 pre 1
 
 The card that we defined calls `<base-card>`, but it overrides some of the content using DRYML's named parameters (`<creation-details:>`). The `replace` attribute means we want to remove the creation-details entirely. For the replacement we insert a `<div>` and use the `<repeat>` tag to insert the list of links. Some things to note:
 	
