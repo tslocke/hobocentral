@@ -1,7 +1,3 @@
-# NOTE
-
-> The tutorial has been partially updated to work with Hobo 0.8 pre 1. The end of the updated content is marked below with a note like this one.
-
 # Hobo Tutorial -- Agility
 
 The full source code for the Agility app is available at [http://github.com/tablatom/agility](http://github.com/tablatom/agility/tree/master).
@@ -180,7 +176,7 @@ To
 	auto_actions :all, :except => :index
 {: .ruby}
 	
-Restart the server and you'll notice that Tasks has been removed from the main nav-bar. Hobo's generic pages (which are just clever defaults that you can override as much or as little as you like) know how to adapt to changes in the actions that you make available.
+Refresh the browser and you'll notice that Tasks has been removed from the main nav-bar. Hobo's page generators adapt to changes in the actions that you make available.
 
 Here's another similar trick. Browse to one of your projects. You'll see the page says "No stories to display" but there's no way to add one. Hobo has support for this but we need to switch it on. Add the following declaration to the stories controller:
 
@@ -195,7 +191,7 @@ Hobo's page generators will respond to the existence of these routes and add a "
 
 Create a story and you'll see the story has the same issue with it's task - there's no way to create one. Again we can add the `auto_actions_for` declaration to the tasks controller, but this time we'll only ask for a `create` action and not a `new` action:
 
-    auto_actions_for :project, :create
+    auto_actions_for :story, :create
 {: .ruby}
     
 Hobo's page generator can cope with the lack of a 'New Task' page -- it gives you an in-line form on the story page.
@@ -298,7 +294,7 @@ Sometimes however, Hobo can't figure out edit permission unless you tell it expl
 You should now get a nice javascript powered control for assigning users in the edit-task page.
 
 
-# Part 4 -- Customizing views
+# Part 4 -- Customising views
 
 It's pretty surprising how far you can get without even touching the view layer. That's the way we like to work with Hobo - get the models and controllers right and the view will probably get close to what you want. From there you can override just those parts of the view that you need to.
 
@@ -332,13 +328,7 @@ OK there's a lot of new concepts thrown at you at once there :-)
 	
 First off, refresh the story page. You'll see that in the cards for each task there is now a list of assigned users. The users are clickable - they link to each users home page (which doesn't have much on it at the moment).
 
-The `<extend>` tag is used to extend any tag that's already defined. The body of `<extend>` is our new definition. It's very common to want to base the new definition on the old one, e.g. just inserting a bit of extra content as we've done here. We can do that by calling the "old" definition, which is available as `<old-card>`.
-    
-# NOTE
-
-> The content below here has *not* been updated for Hobo 0.8 pre 1
-
-The card that we defined calls `<base-card>`, but it overrides some of the content using DRYML's named parameters (`<creation-details:>`). The `replace` attribute means we want to remove the creation-details entirely. For the replacement we insert a `<div>` and use the `<repeat>` tag to insert the list of links. Some things to note:
+The `<extend>` tag is used to extend any tag that's already defined. The body of `<extend>` is our new definition. It's very common to want to base the new definition on the old one, for example, we often want to insert a bit of extra content as we've done here. We can do that by calling the "old" definition, which is available as `<old-card>`. We've passed the `<append-body:>` parameter to `<old-card>` which, in a startling twist, is used to append content to the body of the card. Some points to note:
 	
  * The `<repeat>` tag provides a `join` attribute which we use to insert the commas
  * The link is created with a simple empty `<a/>`. It links to the 'current context' which, in this case, is the user.
@@ -348,27 +338,32 @@ The card that we defined calls `<base-card>`, but it overrides some of the conte
 	
 ## Add a task summary to the user's home page
 
-Now that each task provides links to the assigned users, the user's page is looking rather bare. What we'd like to see there is a list of all the tasks the user has been assigned to. Having them grouped by story would be helpful too.
+Now that each task provides links to the assigned users, the user's page is not looking great. Rapid has rendered cards for the task-assignments but there's no meaningful content in them. What we'd like to see there is a list of all the tasks the user has been assigned to. Having them grouped by story would be helpful too.
 
-To achieve this we want to create a custom template for `users/show`. If you look in `app/views/users` you'll see that it's empty. When a page template is missing, Hobo tries to fall back on a defined tag. For a 'show' page, that tag is `<show-page>`. The Rapid library provides a definition of `<show-page>`, so that's what we're seeing at the moment. As soon as we create `app/views/users/show.dryml`, that file will take over from the generic `<show-page>` tag. Try creating that file and just throw "Hello!" in there for now. You should see that the user's show page now displays just "Hello" and has lost all of the page styling. 
+To achieve this we want to create a custom template for `users/show`. If you look in `app/views/users` you'll see that it's empty. When a page template is missing, Hobo tries to fall back on a defined tag. For a 'show' page, that tag is `<show-page>`. The Rapid library provides a definition of `<show-page>`, so that's what we're seeing at the moment. As soon as we create `app/views/users/show.dryml`, that file will take over from the generic `<show-page>` tag. Try creating that file and just throw "Hello!" in there for now. You should see that the user's show page now displays just "Hello!" and has lost all of the page styling. 
 
-If you now edit `show.dryml` to read "`<show-page>`" you'll see we're back where we started. The `<show-page>` tag is just being called explicitly instead of by convention. Now we can start to customize. Edit `show.dryml` to read:
+If you now edit `show.dryml` to read "`<show-page/>`" you'll see we're back where we started. The `<show-page>` tag is just being called explicitly instead of by convention. Rapid has generated a custom definition of `<show-page for="User">`. You can find this in `app/views/taglibs/auto/rapid/pages.dryml`. Don't edit this file! Your changes will be overwritten. Instead use this file as a reference so you can see what the page provides, and what parameters there are (the `param` attributes). You'll see:
+
+    <section param="content-body">
+{: .dryml}
+    
+That means you can change that part of the page entirely, like this:
 
 	<show-page>
-	  <content-body:>Hello</content-body:>
+	  <content-body:>Hello!</content:>
 	</show-page>
 {: .dryml}
-	
-The "Hello" message is back, but now it's embedded in the properly marked-up page. We've used the named parameter 'content-body', which is provided by the definition of `<show-page>` in Rapid.
+
+Edit show.dryml to look like that. The "Hello!" message is back, but now it's embedded in the properly marked-up page. 
 
 Now let's get the content we're after - the user's assigned tasks, grouped by story. It's only five lines of markup:
 
 	<show-page>
 	  <content-body:>
-	    <h2><Your/> Assigned Tasks</h2>
+	    <h3><Your/> Assigned Tasks</h3>
 	    <repeat with="&@user.tasks.group_by(&:story)">
-	      <h3><a with="&this_key"/></h3>
-	      <collection class="tasks"/>
+	      <h4>Story: <a with="&this_key"/></h4>
+	      <collection/>
 	    </repeat>
 	  </content-body:>
 	</show-page>
@@ -376,13 +371,13 @@ Now let's get the content we're after - the user's assigned tasks, grouped by st
 
 Again - lots of new stuff there. Let's quickly run over what's going on
 
- * The `<Your>` tag is a handy little gadget. It outputs "Your" if the context is the current user, otherwise it outputs the user's name. You'll see "Your Assigned Tasks" when looking at yourself, and "Fred's Assigned Tasks" when you're looking at Fred.
+ * The `<Your>` tag is a handy little gadget. It outputs "Your" if the context is the current user, otherwise it outputs the user's name. You'll see "Your Assigned Tasks" when looking at yourself, and "Fred's Assigned Tasks" when looking at Fred.
 	
  * We're using `<repeat>` again, but this time we're setting the context to the result of a Ruby expression (`with="&...expr..."`). The expression `@user.tasks.group_by(&:story)` gives us the grouped tasks.
 
  * We're repeating on a hash this time. Inside the repeat `this` (the implicit context) will be an array of tasks, and `this_key` will be the story. So `<a with="&this_key">` gives us a link to the story. 
 	
- * `<collection>` is used to render a collection of anything. By default it renders `<card>` tags in a `<ul>` list. Like `<card>` it can be overridden for specific types. For example, you could chose that a collection of projects should be rendered as a table.
+ * `<collection>` is used to render a collection of anything in a `<ul>` list. By default it renders `<card>` tags. To change this just provide a body to the `<collection>` tag.
 	
 That's probably a lot to take in all at once -- the main idea here is to throw you in and give you an overview of what's possible. The [DRYML Guide][] will shed more light.
 
@@ -390,31 +385,37 @@ That's probably a lot to take in all at once -- the main idea here is to throw y
 	
 ## Improve the project page with a searchable, sortable table
 
-The project page is currently workable, but we can easily improve it a lot. Rapid provides a tag `<table-plus>` which renders a table with support for sorting by clicking on the headings, and a built-in search bar for filtering the rows displayed. Searching and sorting are done server-side so we need to modify the controller as well as the view for this one.
+The project page is currently workable, but we can easily improve it a lot. Rapid provides a tag `<table-plus>` which renders a table with support for sorting by clicking on the headings, and a built-in search bar for filtering the rows displayed. Searching and sorting are done server-side so we need to modify the controller as well as the view for this enhancement.
 
 As with the user's show-page, to get started put a simple call to `<show-page/>` in `app/views/projects/show.dryml`
 
-The `<show-page>` tag has a concept of a "primary collection". This is the collection of cards that are rendered in the page. In this case Rapid has chosen the `stories` collection as the primary collection, which is why we see cards for all of the stories. The only thing we want to change at this stage is the way that collection is rendered, so we override the content of the `<primary-collection:>` parameter.
+To see what this page is doing, take a look at `<def tag="show-page" for="Project">` in `pages.dryml` (in `app/views/taglibs/auto/rapid`). Notice this tag:
+    
+    <collection:stories param/>
+{: .dryml}
 
-As an experiment, try this:
+    
+That's the part we want to replace with the table. Note that when a `param` attribute doesn't give a name, the name defaults to the same name as the tag. Here's how we would replace that `<collection>` with a simple list of links:
 
 	<show-page>
-	  <primary-collection:>
-	    <repeat join=", "><a/></repeat>
-	  </primary-collection:>
+	  <collection: replace>
+	    <div>
+	      <repeat:stories join=", "><a/></repeat>
+	    </div>
+	  </collection:>
 	</show-page>
 {: .dryml}
-	
-You should now see that in place of the story cards, we now get a simple comma-separated list of links to the stories. Not what we want of course, but it illustrates the concept of overriding the primary-collection. We didn't even have to set the context because it's already set to the collection by `<show-page>`
+
+You should now see that in place of the story cards, we now get a simple comma-separated list of links to the stories. Not what we want of course, but it illustrates the concept of replacing a parameter.
 
 Here's how we get the table-plus:
 
 	<show-page>
-	  <primary-collection:>
-	    <table-plus fields="this, status">
-	      <empty-message:>No stories match your criteria</empty-message:>
-	    </table-plus>
-	  </primary-collection:>
+	  <collection: replace>
+        <table-plus:stories fields="this, status">
+          <empty-message:>No stories match your criteria</empty-message:>
+        </table-plus>
+	  </collection:>
 	</show-page>
 {: .dryml}
 
@@ -422,16 +423,21 @@ The `fields` attribute to `<table-plus>` lets you specify a list of fields that 
 
 We could also add a column showing the number of tasks in a story. Change to `fields="this, tasks.count, status"` and see that a column is added with a readable title "Tasks Count".
 
-To enable the 'Search' feature of the table, we need to update the controller side. Add a `show` method to `app/controllers/projects_controller.rb` like this:
+To get the search feature working, we need to update the controller side. Add a `show` method to `app/controllers/projects_controller.rb` like this:
 	
 	def	show
 	  @project = find_instance
-	  @project_stories = 
+	  @stories = 
 	    @project.stories.apply_scopes(:search    => [params[:search], :title],
 	                                  :order_by  => parse_sort_param(:title, :status))
 	end
 {: .ruby}
-	
+
+Then get the `<table-plus>` to use `@stories`:
+
+    <table-plus with="&@stories" fields="this, tasks.count, status">
+{: .dryml}
+
 (To do -- explain how that works!)
 	
 # Part 5 -- odds and ends
@@ -442,7 +448,7 @@ We're now going to work through some more easy but very valuable enhancements to
 
  * Add filtering o stories by status to the project page
 
- * Drag and drop re-ordering of tasks. This effectively gives us prioritization of tasks.
+ * Drag and drop re-ordering of tasks. This effectively gives us prioritisation of tasks.
 
  * Markdown or textile formatting of stories. This is implemented by changing *one symbol* in the source code.
 
@@ -480,7 +486,7 @@ In order to support management of the statuses available, we'll create a StorySt
 	
 Whenever you create a new model + controller with Hobo, get into the habit of thinking about permissions and controller actions. In this case, we probably want only admins to be able to manage the permissions. As for actions, we probably only want the write actions, and the index page:
 
-	auto_actions :write_only, :index
+	auto_actions :write_only, :new, :index
 {: .ruby}
 	
 Next step, we can remove the 'status' field from the Story model, and instead add an association with the StoryStatus model:
@@ -492,20 +498,17 @@ Now run the migration generator
 
 	$ ./script/generate hobo_migration
 	
-You'll see that the migration generator considers this change to be ambiguous. Whenever there are columns removed *and* columns added, the migration generator can't tell whether you're actually removing one column and 
-adding another, or if you are renaming the old column. It's also pretty fussy about what it makes you type. We really don't want to play fast and lose with your precious data, so to confirm that you want to drop the 'status' column, you have to type in full: "drop status".
+You'll see that the migration generator considers this change to be ambiguous. Whenever there are columns removed *and* columns added, the migration generator can't tell whether you're actually removing one column and adding another, or if you are renaming the old column. It's also pretty fussy about what it makes you type. We really don't want to play fast and lose with your precious data, so to confirm that you want to drop the 'status' column, you have to type in full: "drop status".
 
 Once you've done that you'll see that the generated migration includes the creation of the new foreign key and the removal of the old status column.
 
-You can always edit the migration before running it. For example you could create some initial story statuses:
+You can always edit the migration before running it. For example you could create some initial story statuses by adding this code to the `self.up` method:
 
-    [:new, :accepted, :discussion, :implementation,
-     :user_testing, :deployed, :rejected].each do |status| 
-      StoryStatus.create :name => status.to_s
-    end
+    statuses = %w(new accepted discussion implementation user_testing deployed rejected)
+    statuses.each { |status| StoryStatus.create :name => status }
 {: .ruby}
 
-That's it. The page to manage the story statuses should appear in the main navigation once you restart your server.
+That's it. The page to manage the story statuses should appear in the main navigation.
 
 Now that we've got more structured statuses, let's do something with them...
 
@@ -513,7 +516,7 @@ Now that we've got more structured statuses, let's do something with them...
 
 Rapid's `<table-plus>` is giving us some nice searching and sorting features on the project page. We can easily add some filtering into the mix, so that it's easy to, say, see only new stories. 
 
-First we'll add the filter control to the header of the table-plus. Rapid provides a `<filter-menu>` tag which is just what we need. We want to add it to the header section, before the stuff that's already there. In DRYML, you can prepend or append content to any named parameter. To prepend content to the header, we use `<prepend-header:>`, like this:
+First we'll add the filter control to the header of the table-plus. Rapid provides a `<filter-menu>` tag which is just what we need. We want to add it to the header section, before the stuff that's already there. In DRYML, you can prepend or append content to any named parameter. `<table-plus>` has a `header:` parameter, so we can use `<prepend-header:>`, like this:
 
 	<table-plus fields="this, status">
 	  <prepend-header:>
@@ -526,8 +529,8 @@ First we'll add the filter control to the header of the table-plus. Rapid provid
 
 To make the filter look right, add this to `public/application.css`
 
-	.show-page.project .filter {float: left;}
-	.show-page.project .filter form {display: inline;}
+    .show-page.project .filter {float: left;}
+    .show-page.project .filter form, .show-page.project .filter form div {display: inline;}
 	
 If you try to use the filter, you'll see it adds a `status` parameter in the query string. We need to pick that up and do something useful with it in the controller. We can use the `apply_scopes` method again, which is already being used, so it's just a matter of adding one more keyword argument:
 
@@ -556,7 +559,7 @@ The migration generator knows about `acts_as_list`, so you can just run it and y
 
 	$ ./script/generate hobo_migration
 	
-And that's it! You will need to restart the server because there's a new route for the reorder action.
+And that's it!
 
 You'll notice a slight glitch -- the tasks position has been added to the new-task and edit-task forms. We don't want that. The easiest way to fix this differs slightly for the new form and the edit form.
 
@@ -571,14 +574,28 @@ When it comes to updating the task, we don't want to ban updates to the position
 
 Create a custom `app/views/tasks/edit.dryml` like this.
 
-	<edit-page>
-	  <field-list: skip="position"/>
-	</edit-page>
+    <edit-page>
+      <form:>
+        <field-list: skip="position"/>
+      </form:>
+    </edit-page>
 {: .dryml}
+
+This is a good demonstration of DRYML's nested parameter feature. The `<edit-page>` makes it's form available as a parameter, and the form provides a `<field-list:>` parameter. We can drill down from the edit-page to the form and then to the field-list to pass in a custom attribute. You can do this to any depth.
+
+You'll also notice that Rapid didn't manage to figure out a destination for the cancel link. You can fix that like this:
+
+    <edit-page>
+      <form:>
+        <field-list: skip="position"/>
+        <cancel-link: to="&this.story"/>
+      </form:>
+    </edit-page>
+    
 	
 # Markdown / Textile formatting of stories
 
-We'll wrap up with a really easy one. Hobo renders model fields based on their type. You can add your own custom types and there's bunch built it, including textile and markdown formatted strings.
+We'll wrap up this section with a really easy one. Hobo renders model fields based on their type. You can add your own custom types and there's bunch built it, including textile and markdown formatted strings.
 
 Location the `fields do ... end` section in the Story model, and change
 
@@ -592,6 +609,7 @@ To
 
 You may need to install the relevant ruby gem: either BlueCloth (markdown) or RedCloth (textile)
 
+
 # Part 6 -- Project Ownership
 
 The next goal for Agility is to move to a full mutli-user application, where users can create their own projects and control who has access to them. Rather than make this change in one go, we'll start with a small change that doesn't do much by itself, but is a step in the right direction: making projects be owned by users.
@@ -599,17 +617,19 @@ The next goal for Agility is to move to a full mutli-user application, where use
 Add the following to the Project model:
 
 	belongs_to :owner, :class_name => "User", :creator => true
+{: .ruby}
 	
 There's a Hobo extension there: `:creator => true` tells Hobo that when creating one of these things, the `owner` association should be automatically set up to be the user doing the create.
 
 We also need the other end of this assocaition, in the User model:
 
 	has_many :projects, :class_name => "Project", :foreign_key => "owner_id"
+{: .ruby}
 	
 How should this effect the permissions? Certain operations on the project should probably be restricted to its owner:
 
 	def creatable_by?(user)
-	  user.signed_up? && owner == user
+	  owner == user
 	end
 
   	def updatable_by?(user, new)
@@ -619,11 +639,28 @@ How should this effect the permissions? Certain operations on the project should
 	def deletable_by?(user)
 	  user.administrator? || user == owner
 	end
+{: .ruby}
 	
 One thing worth noting in the `creatable_by?` method. We assert that `owner == user`. This is very often found in conjunction with `:creator => true`. Together, these mean that the current user can create their own projects only, and the "Owner" form field will be automatically removed from the new project form.
 
-Tip: Now that the projects are not viewable by everyone, projects/index won't be working well. You might want to disable the index action on ProjectsController. As we're moving Agility to be more of a social app, you might want to enable the index action on UsersController instead. Restart the server to see the change in the nav-bar.
+Run the migration generator to see the effect on the app:
 
+    $ ./script/generate hobo_migration
+    
+Finally lets add a handy list of "Your Projects" to the home page. Edit the content-body section of `app/views/front/index.dryml` to be:
+
+    <section class="content-body" if="&logged_in?">
+      <h3>Your Projects</h3>
+      <collection:projects with="&current_user"/>
+    </section>
+    
+One thing you'll notice is that the project cards have a link to the project owner. In general that's quite useful, but in this context it doesn't make much sense. DRYML is very good at favouring context over consistency -- we can remove that link very easily:
+
+    <section class="content-body">
+      <h3>Your Projects</h3>
+      <collection:projects with="&current_user"><card without-creator-link/></collection>
+    </section>
+    
 
 # Part 7 -- Granting read access to others
 
@@ -632,13 +669,17 @@ Now that we've got users owning their own projects, it seems wrong that any sign
 We can model this with a ProjectMembership model that represents access for a specific user and project:
 
 	$ ./script/generate hobo_model_resource project_membership
+	
+First remove the actions we don't need on the `ProjectMembershipsController`:
 
-## The model layer
+    auto_actions :write_only
+{: .ruby}
 
-First we'll add the associations to the model:
+Next, add the associations to the model:
 
 	belongs_to :project
 	belongs_to :user
+{: .ruby}
 	
 Then permissions -- only the project owner (and admins) can manipulate these:
 
@@ -657,57 +698,119 @@ Then permissions -- only the project owner (and admins) can manipulate these:
 	def viewable_by?(user, field)
 	  true
 	end
+{: .ruby}
 	
 Let's do the other ends of those two belongs-to associations. In the Project model:
 	
 	has_many :memberships, :class_name => "ProjectMembership", :dependent => :destroy
-	has_many :members, :through => :memberships, :source => :user, :managed => true
+	has_many :members, :through => :memberships, :source => :user
+{: .ruby}
 	
 And in the User model (remember that User already has an association called `projects` so we need a new name):
 
 	has_many :project_memberships, :dependent => :destroy
   	has_many :joined_projects, :through => :project_memberships, :source => :project
+{: .ruby}
   
-Now we can define view permission on projects, stories and tasks according to project membership.
+Note that users now have two collections of projects: `projects` are the projects that users owns, and `joined_projects` are the projects they have joined as a member.
+
+We can now define view permission on projects, stories and tasks according to project membership.
 
 In Project:
 
 	def viewable_by?(user, field=nil)
       user.administrator? || user == owner || user.in?(members)
 	end
+{: .ruby}
   
 In Story:
 
 	def viewable_by?(user, field=nil)
 	  project.viewable_by?(user)
 	end
+{: .ruby}
 
 In Task:
 
 	def viewable_by?(user, field)
 	  story.viewable_by?(user)
 	end
+{: .ruby}
+	
+Finally, now that not all projects are viewable by all users, the projects index page won't work too well. The best thing to do is just remove it. In `ProjectsController`:
+
+    auto_actions :all, :except => :index
+{: .ruby}
+
 	
 ## The view layer
 	
-The last step is that we need a UI to manage these memberships. We're going to do it all ajax-style on the project show page. First up, we'll add a side-bar to the projects/show page that lists the members of the projects. The Rapid pages and the clean theme already have support for sidebars through the "aside layout". To turn in on, edit projects/show.dryml as follows (don't get rid of the `<primary-collection:>` parameter that's there already):
+The last step is that we need a UI to manage these memberships. We're going to do it all ajax-style on the project show page. First up, we'll add a side-bar to the projects/show page that lists the members of the projects. The Rapid library and the Clean theme work together to make these kinds of layout easy. The `<section-group>` tag is used whenever we want to lay out a group of `<section>` tags or `<aside>` tags. Here's the markup for a page with a simple aside layout:
 
-	<show-page layout="aside">
-	  <aside:>Aside Content</aside:>
-	  ...
-	</show-page>
-	
-Refresh the page and you'll see the side-bar appear.
+    <page>
+      <content:>
+        <section-group>
+          <section with-flash-messages>
+            Main content
+          </section>
+          <aside>
+            Aside content
+          </aside>
+        </section-group>
+      </content:>
+    </page>
+{ .dryml}
 
-Now we'll display the members of the project in the side-bar using the `<collection>` tag which we've seen before:
+Start by adding that markup to your project show page. Note the use of the `with-flash-messasges` attribute to move the flash messages into the main section:
 
-	<show-page layout="aside">
-	  <aside:>
-	    <h2>Project Members</h2>
-	    <collection:members/>
-	  </aside:>
-	  ...
-	</show-page>
+    <show-page>
+      <content:>
+        <section-group>
+          <section with-flash-messages>
+            Main content
+          </section>
+          <aside>
+            Aside content
+          </aside>
+        </section-group>
+      </content:>
+      
+      <collection: replace>
+        ...
+      </collection>
+    </page>
+{ .dryml}
+
+You will now have a page with a sidebar, but of course you've also lost all the content that was on that page, because we've entirely overwritten the body of the `<content:>` parameter. DRYML provides the ability to recall the original parameter content with `<param-content for="content"/>`. Edit the page to look like this:
+
+    <show-page>
+      <content:>
+        <section-group>
+          <section>
+            <param-content for="content"/>
+          </section>
+          <aside>
+            Aside content
+          </aside>
+        </section-group>
+      </content:>
+      
+      <collection: replace>
+        ...
+      </collection>
+    </page>
+{ .dryml}
+
+
+You should now have the original page back with the sidebar added. We'll display the members of the project in the side-bar using the `<collection>` tag which we've seen before:
+
+	...
+	<aside>
+      <h3>Project Members</h3>
+	  <collection:members/>
+	</aside:>
+	...
+{ .dryml}
 	
 ## A form with auto-completion
 	
@@ -719,26 +822,26 @@ First we need the controller side of the auto-complete. We're going to add an au
 	  project = find_instance
 	  hobo_completions :username, User.without_project(project).is_not(project.owner)
 	end
+{ .ruby}
 
-You can read this as: create an auto-complete action '`new_member_name`' that finds users that are not already members of the project, and not the owner of the project and completes the `:username` field.
+You can read this as: create an auto-complete action called '`new_member_name`' that finds users that are not already members of the project, and not the owner of the project and completes the `:username` field.
 
-Now the form in projects/show.dryml. We'll use Hobo's ajax part mechanism to refresh the collection without reloading the page:
+for Now the form in projects/show.dryml. We'll use Hobo's ajax part mechanism to refresh the collection without reloading the page:
 
-	<show-page layout="aside">
-
-	  <aside:>
-        <h2>Project Members</h2>
-	    <collection:members part="members"/>
-
-	    <form:memberships.new update="members" reset-form refocus-form>
-	      <div>
-		    Add a member: 
-		    <name-one:user complete-target="&@project" completer="new_member_name"/>
-		  </div>
-	    </form:memberships.new>
-	  </aside:>
-	  ...
-	</show-page>
+    ...
+    <aside>
+      <h2>Project Members</h2>
+      <collection:members part="members"/>
+   
+      <form:memberships.new update="members" reset-form refocus-form>
+        <div>
+          Add a member: 
+          <name-one:user complete-target="&@project" completer="new_member_name"/>
+        </div>
+      </form>
+    </aside:>
+	...
+{ .dryml}
 	
 Some things to note:
 
@@ -750,34 +853,23 @@ Some things to note:
 
 ## Removing members
 
-The sidebar we just implemented has an obvious draw-back -- there's no way to remove members. In typical RESTful style, removing a member is achieved by deleting a membership. What we'd like is a delete button on each card that removes the membership. That means what we really want are *Membership* cards in the sidebar (at the moment they are User cards).
+The sidebar we just implemented has an obvious draw-back -- there's no way to remove members. In typical RESTful style, removing a member is achieved by deleting a membership. What we'd like is a delete button on each card that removes the membership. That means what we really want are *Membership* cards in the sidebar (at the moment they are User cards). Change:
 
-The first step is to define a Membership card. We'll define it in terms of base-card, with the single change that the card heading should be the name of the user (and we'll make it a link to the user while we're at it ):
+    <collection:members part="members"/>
+{ .dryml}
+    
+To:
 
-	<def tag="card" for="ProjectMembership">
-	  <base-card merge>
-	    <heading:><a:user/></heading:>
-	  </base-card>
-	</def>
-	
-Now we can change projects/show.dryml so that it renders these cards. We'll also show a little with DRYML's implicit context -- we set the context on the whole section of the page so that we don't have to set it multiple times:
-
-	<aside:>
-	  <section:memberships class="memberships">
-	    <h2>Project Memberships</h2>
-	    <collection part="members"/>
-
-	    <form:new update="members" reset-form refocus-form>
-	      <div>
-	        Add a member:
-	        <name-one:user complete-target="&@project" completer="new_member_name"/>
-	      </div>
-	    </form:new>
-	  </section:memberships>
-	</aside:>
-	
-Now that the `<section>` set the context to the project's memberships, the `<collection>` doesn't need to set the context again, and the `<form>` tag just needs the `:new`.
-	
+    <collection:memberships part="members"/>
+{ .dryml}
+    
+Problem -- the membership card doesn't display the users name. There are two ways we could fix this. We could either customise the global membership card using `<extend tag="card" for="Membership">` in `application.dryml`, or we could customise *this particular usage* of the membership card. Let's do the latter. Modify the `<collection:memberships>` as follows:
+    
+    <collection:memberships part="members">
+      <card><heading:><a:user/></heading:></card>
+    </collection>
+{ .dryml}
+		
 
 # Part 8 -- Granting write access to others
 
@@ -786,19 +878,23 @@ It's not enough just to allow others to view your projects, you need to allow so
 The steps are:
 
  - Add a boolean field "contributor" to the ProjectMembership model
- - Modify the permissions of stories and tasks so that people with this field set to true on their project membership can make changes
+ - Modify the permissions of stories and tasks so that users with this field set to true on their project membership can make changes
  - Use the `<editor>` tag to create an ajax editor for that field in the ProjectMembership card.
 	
 That's all the hints we're going to give you for this one -- good luck!
 
-Oh OK one more hint, here's some code that might be handy in the Project model:
+Oh OK one more hint, here's some associations that might be handy in the Project model:
 
 	has_many :contributor_memberships, :class_name => "ProjectMembership", :scope => :contributor
 	has_many :contributors, :through => :contributor_memberships, :source => :user
+{ .ruby}	
+
+And a helper method that might come in handy from your permission methods:
 
 	def accepts_changes_from?(user)
 	  user.administrator? || user == owner || user.in?(contributors)
 	end
+{ .ruby}
 
 
 # Part 9 -- Ideas for extending the app.
@@ -818,6 +914,8 @@ The current users show page could be improved a lot. For example, it doesn't giv
 
 
 # Appendix -- Styling the Application
+
+**NOTE: This section has not been updated for Hobo 0.8. It will mostly work but there might be some style glitches**
 
 The default Hobo theme “Clean” provides comprehensive but minimal styling for all of Hobo’s generic pages and tags. When styling your app you have a choice between creating your own theme from scratch or tweaking an existing theme to suit your needs. The Clean theme has been designed with this in mind, it can be adapted to look very different with only a small amount of effort. 
 
@@ -849,7 +947,7 @@ For example:
 
 We'll now add some styling to `public/stylesheets/application.css` to make our Agility app look a bit different.
 
-The first thing we'll do is switch from a "boxed in" look to an horizontally open style. To do this we'll use a background image to draw a horizontal top banner across the whole page and change the page background color to white. 
+The first thing we'll do is switch from a "boxed in" look to an horizontally open style. To do this we'll use a background image to draw a horizontal top banner across the whole page and change the page background colour to white. 
 
     html, body {
     	background-image: url(/images/header.png);
