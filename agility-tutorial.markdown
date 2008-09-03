@@ -332,7 +332,7 @@ The `<extend>` tag is used to extend any tag that's already defined. The body of
 	
  * The `<repeat>` tag provides a `join` attribute which we use to insert the commas
  * The link is created with a simple empty `<a/>`. It links to the 'current context' which, in this case, is the user.
- * The `:users` in `<repeat:users>` switches the context. It selects the `users` association of the story.
+ * The `:users` in `<repeat:users>` switches the context. It selects the `users` association of the task.
  * DRYML has a multi-purpose `<else>` tag. When used with repeat, it provides a default for the case when the collection is empty.
 	
 	
@@ -350,7 +350,7 @@ If you now edit `show.dryml` to read "`<show-page/>`" you'll see we're back wher
 That means you can change that part of the page entirely, like this:
 
 	<show-page>
-	  <content-body:>Hello!</content:>
+	  <content-body:>Hello!</content-body:>
 	</show-page>
 {: .dryml}
 
@@ -527,7 +527,7 @@ First we'll add the filter control to the header of the table-plus. Rapid provid
 	</table-plus>
 {: .dryml}
 
-To make the filter look right, add this to `public/application.css`
+To make the filter look right, add this to `public/stylesheets/application.css`
 
     .show-page.project .filter {float: left;}
     .show-page.project .filter form, .show-page.project .filter form div {display: inline;}
@@ -816,7 +816,7 @@ You should now have the original page back with the sidebar added. We'll display
 	
 Finally we'll add the form to add a new person to the project. We'll set it up so that you can type the user's name, with autocompletion, in order to add someone to the project.
 
-First we need the controller side of the auto-complete. We're going to add an auto-completer to ProjectsController that will only complete the names of people that are not already members of the project. Hobo's automatically scopes come very handy. Add this declaration to `projects_controller.rb`:
+First we need the controller side of the auto-complete. We're going to add an auto-completer to ProjectsController that will only complete the names of people that are not already members of the project. Hobo's automatic scopes come very handy. Add this declaration to `projects_controller.rb`:
 
 	autocomplete :new_member_name do
 	  project = find_instance
@@ -826,7 +826,7 @@ First we need the controller side of the auto-complete. We're going to add an au
 
 You can read this as: create an auto-complete action called '`new_member_name`' that finds users that are not already members of the project, and not the owner of the project and completes the `:username` field.
 
-for Now the form in projects/show.dryml. We'll use Hobo's ajax part mechanism to refresh the collection without reloading the page:
+Now for the form in projects/show.dryml. We'll use Hobo's ajax part mechanism to refresh the collection without reloading the page:
 
     ...
     <aside>
@@ -972,7 +972,7 @@ Next we'll want to position the contents of the page header differently since we
 
 Next we'll move the main navigation bar to the top right of the page and change the way it looks.
 
-    .page-header .nav {
+    .page-header .main-nav {
     	position: absolute; top: 0; right: 0;
     }
     .page-header .main-nav li {margin-right: 1px;}
