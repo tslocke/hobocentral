@@ -1,6 +1,6 @@
 # Hobo Tutorial -- Agility
 
-The full source code for the Agility app is available at [http://github.com/tablatom/agility](http://github.com/tablatom/agility/tree/master).
+The full source code for the Agility app is available at [http://github.com/tablatom/agility](http://github.com/tablatom/agility/tree/master). (NOTE: This is the old version! Not yet updated for Hobo 0.8. The tutorial itself *is* updated for Hobo 0.8 though)
 
 In this tutorial we'll be creating a simple "Agile Development" application -- _Agility_. The application tracks projects which consist of a number of user stories. Stories have a status (e.g. accepted, under development...) as well as a number of associated tasks. Tasks can be assigned to users, and each user can see a heads-up of all the tasks they've been assigned to on their home page.
 
@@ -820,7 +820,7 @@ First we need the controller side of the auto-complete. We're going to add an au
 
 	autocomplete :new_member_name do
 	  project = find_instance
-	  hobo_completions :username, User.without_project(project).is_not(project.owner)
+	  hobo_completions :username, User.without_owned_project(project).is_not(project.owner)
 	end
 { .ruby}
 
