@@ -1,4 +1,5 @@
 # The DRYML Guide
+{.document-title}
 
 Welcome to the DRYML Guide. If you want to learn all the ins and outs of DRYML and become a master of quick and elegant view templates, you're in the right place. If you're very new to Hobo and DRYML you might not be in the right place, as this guide is more of a reference, designed to fill in the gaps for people who have already got the hang of the basics. Something like the Agility tutorial would be a good place to start. Right, lets get started!
 
@@ -33,7 +34,7 @@ In it's most basic usage, DRYML can be indistinguishable from a normal Rails tem
         </div>
       </body>
     </html>
-
+{.dryml}
 
 ## No ERB inside tags
 
@@ -89,13 +90,13 @@ Here's the page from the previous section, defined as a `<page>` tag simply by w
         </body>
       </html>
     </def>
-
+{.dryml}
 
 
 Now we can call that tag just as we would call any other:
 
     <page/>
-
+{.dryml}
 
 If you'd like an analogy to "normal" programming, you can think of the `<def>...</def>` as defining a method called `page`, and `<page/>` as a call to that method. In fact, DRYML is implemented by compiling to Ruby, and that is exactly what is happening.
 
@@ -111,7 +112,7 @@ We've illustrated the most basic usage of `<def>`, but out `<page>` tag is not v
         <body param/>
       </html>
     </def>
-
+{.dryml}
 
 
 Now we can call that tag providing our own body:
@@ -126,7 +127,7 @@ Now we can call that tag providing our own body:
         </div>
       </body:>
     </page>
-
+{.dryml}
 
 See how easy that was? We just added `param` to the `<body>` tag, which means our page tag now has a parameter called `body`. In the call we provide some content for that parameter. It's very important to read that call to `<page>` properly. In particular, the `<body:>` (note the trailing ':') is *not* a call to a tag, it is providing a named parameter to the call to `<page>`. We call `<body:>` a *parameter tag*. In Ruby terms you could think of the call like this:
         
@@ -146,7 +147,7 @@ To give the parameter a different name, we can provide a value to the `param` at
         <body param="content"/>
       </html>
     </def>
-
+{.dryml}
 
 We would now call the tag like this:
 
@@ -167,7 +168,7 @@ As you would expect, we can define many parameters in a single tag. For example,
         </body>
       </html>
     </def>
-
+{.dryml}
 
 Which we could call like this:
 
@@ -175,7 +176,7 @@ Which we could call like this:
       <content:> ... main content here ... </content:>
       <aside:>  ... aside content here ... </aside:>
     </page>
-
+{.dryml}
 
 Note that when you name a parameter, DRYML automatically adds css classes of the same name to the output, so the two `<div>` tags above will be output as `<div class="content">` and `<div class="aside">` respectively.
     
@@ -191,7 +192,7 @@ In the examples we've seen so far, we've only put the `param` attribute on empty
         <body param>
       </html>
     </def>
-
+{.dryml}
 
 We've made the page title parameterised. All existing calls to `<page/>` will continue to work unchanged, but we've now got the ability to change the title on a per-page basis:
 
@@ -201,7 +202,7 @@ We've made the page title parameterised. All existing calls to `<page/>` will co
         ... body content
       </body:>
     </page>
-
+{.dryml}
 
 This is a very nice feature of DRYML - whenever you're writing a tag, and you see a part that might be useful to change in some situations, just throw the `param` attribute at it and you're done.
 
@@ -220,14 +221,14 @@ You can nest `param` declarations inside other tags that have `param` on them. F
         </body>
       </html>
     </def>
-
+{.dryml}
 
 Here the `<body>` tag is a `param`, and so are the two `<div>` tags inside it. It can be called either like this:
     
     <page>
       <body:> ... page content goes here ... </body:>
     </page>
-    
+{.dryml}    
 
 Or like this:
 
@@ -235,7 +236,7 @@ Or like this:
       <content:> ... main content here ... </content:>
       <aside:>  ... aside content here ... </aside:>
     </page>
-
+{.dryml}
 
 An interesting question is, what happens if you give both a `<body:>` parameter and say, `<content:>`. By providing the `<body:>` parameter, you have replaced everything inside the body section, including those two parameterised `<div>` tags, so the `<body:>` you have provided will appear as normal, but the `<content:>` parameter will just be silently ignored.
 
@@ -252,13 +253,14 @@ In the situation where you only want a single parameter, you can use the special
         <body param="default"/>
       </html>
     </def>
-
+{.dryml}
 
 Now there is no need to give a parameter tag in the call at all - the content directly inside the `<page>` tag becomes the `default` parameter:
     
     <page> ... body content goes here -- no need for a parameter tag ... </page>
     
 You might notice that the `<page>` tag is now indistinguishable from a normal HTML tag. Some find this aspect of DRYML disconcerting at first -- how can you tell what is an HTML tag and what it a defined DRYML tag? The answer is -- you can't, and that's quite deliberate. This allows you to do nice tricks like define your own smart `<form>` tag or `<a>` tag (the Rapid library does exactly that). Other template languages (e.g. Java's JSP) like to put everything in XML namespaces. The result is very cluttered views that are boring to type and hard to read. From the start we put a very high priority on making DRYML templates compact and elegant. When you're new to DRYML you might have to do a lot of looking things up, as you would with any new language or API, but things gradually become familiar and then view templates can be read and understood very easily.
+{.aside}    
 
 
  - The implicit context
