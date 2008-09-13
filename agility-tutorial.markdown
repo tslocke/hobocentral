@@ -621,7 +621,7 @@ Add the following to the Project model:
 	
 There's a Hobo extension there: `:creator => true` tells Hobo that when creating one of these things, the `owner` association should be automatically set up to be the user doing the create.
 
-We also need the other end of this assocaition, in the User model:
+We also need the other end of this association, in the User model:
 
 	has_many :projects, :class_name => "Project", :foreign_key => "owner_id"
 {: .ruby}
@@ -737,15 +737,21 @@ In Task:
 	end
 {: .ruby}
 	
-Finally, now that not all projects are viewable by all users, the projects index page won't work too well. The best thing to do is just remove it. In `ProjectsController`:
+Finally, now that not all projects are viewable by all users, the projects index page won't work too well. In addition, the top-level New Project page at `/projects/new` isn't suited to our purposes any more. It will fit better with Hobo's RESTful architecture to create projects for specific users, e.g. at `/users/12/projects/new`
 
-    auto_actions :all, :except => :index
+So we'll modify the actions provided by the projects controller to:
+
+    auto_actions :show, :edit, :update, :destroy
+    
+    auto_actions_for :owner, [:new, :create]
 {: .ruby}
+
+Note that there won't be a link to that new-project page by default -- we'll add one in the next section.
 
 	
 ## The view layer
 	
-The last step is that we need a UI to manage these memberships. We're going to do it all ajax-style on the project show page. First up, we'll add a side-bar to the projects/show page that lists the members of the projects. The Rapid library and the Clean theme work together to make these kinds of layout easy. The `<section-group>` tag is used whenever we want to lay out a group of `<section>` tags or `<aside>` tags. Here's the markup for a page with a simple aside layout:
+We need a UI to manage these memberships. We're going to do it all ajax-style on the project show page. First up, we'll add a side-bar to the projects/show page that lists the members of the projects. The Rapid library and the Clean theme work together to make these kinds of layout easy. The `<section-group>` tag is used whenever we want to lay out a group of `<section>` tags or `<aside>` tags. Here's the markup for a page with a simple aside layout:
 
     <page>
       <content:>
@@ -814,7 +820,7 @@ You should now have the original page back with the sidebar added. We'll display
 	
 ## A form with auto-completion
 	
-Finally we'll add the form to add a new person to the project. We'll set it up so that you can type the user's name, with autocompletion, in order to add someone to the project.
+Now we'll create the form to add a new person to the project. We'll set it up so that you can type the user's name, with autocompletion, in order to add someone to the project.
 
 First we need the controller side of the auto-complete. We're going to add an auto-completer to ProjectsController that will only complete the names of people that are not already members of the project. Hobo's automatic scopes come very handy. Add this declaration to `projects_controller.rb`:
 
@@ -869,7 +875,24 @@ Problem -- the membership card doesn't display the users name. There are two way
       <card><heading:><a:user/></heading:></card>
     </collection>
 { .dryml}
-		
+
+## Final steps
+
+There's just a couple of things to do to round this part of the tutorial off. Firstly, you might have noticed there's no place to create a new project at the moment. There's also no place that list "Projects you have joined". We'll add both of those to the front page, in the place we currently have a list of "Your projects". Replace that entire `<section class="content-body">` with the following DRYML:
+    
+    <section with="&current_user" class="content-body" if="&logged_in?">
+      <h3>Your Projects</h3>
+      <collection:projects><card without-creator-link/></collection>
+      
+      <a:projects action="new">New Project</a>
+      
+      <h3>Projects you have joined</h3>
+      <collection:joined-projects><card without-creator-link/></collection>
+    </section>
+{ .dryml}
+
+Notice how we set the context on the entire section to be the current user (`with="&current_user"`). That makes the mark-up inside the section much more compact and easy to read.
+
 
 # Part 8 -- Granting write access to others
 
