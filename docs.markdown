@@ -4,14 +4,11 @@
 
  * [What is Hobo?](/about)
  * [Try it - create an app in two Minutes](/two-minutes)
- * [Detailed install instructions for Windows][1] (external link, PDF)
-
-[1]: http://owendall.files.wordpress.com/2008/04/installing-ruby-rails-and-hobo-075-on-windows-xp.pdf
 
 ## Tutorials
 
  * [Agility Tutorial (story manager)](/agility-tutorial)
- * [POD Tutorial (classified ads)](/pod-tutorial)
+ * [POD Tutorial (classified ads) NOT YET UPDATED for Hobo 0.8](/pod-tutorial)
 
 ## Manual
 
