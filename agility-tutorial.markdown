@@ -765,7 +765,7 @@ We need a UI to manage these memberships. We're going to do it all ajax-style on
         </section-group>
       </content:>
     </page>
-{ .dryml}
+{: .dryml}
 
 Start by adding that markup to your project show page. Note the use of the `with-flash-messasges` attribute to move the flash messages into the main section:
 
@@ -785,7 +785,7 @@ Start by adding that markup to your project show page. Note the use of the `with
         ...
       </collection>
     </page>
-{ .dryml}
+{: .dryml}
 
 You will now have a page with a sidebar, but of course you've also lost all the content that was on that page, because we've entirely overwritten the body of the `<content:>` parameter. DRYML provides the ability to recall the original parameter content with `<param-content for="content"/>`. Edit the page to look like this:
 
@@ -805,7 +805,7 @@ You will now have a page with a sidebar, but of course you've also lost all the 
         ...
       </collection>
     </page>
-{ .dryml}
+{: .dryml}
 
 
 You should now have the original page back with the sidebar added. We'll display the members of the project in the side-bar using the `<collection>` tag which we've seen before:
@@ -816,7 +816,7 @@ You should now have the original page back with the sidebar added. We'll display
 	  <collection:members/>
 	</aside:>
 	...
-{ .dryml}
+{: .dryml}
 	
 ## A form with auto-completion
 	
@@ -828,7 +828,7 @@ First we need the controller side of the auto-complete. We're going to add an au
 	  project = find_instance
 	  hobo_completions :username, User.without_owned_project(project).is_not(project.owner)
 	end
-{ .ruby}
+{: .ruby}
 
 You can read this as: create an auto-complete action called '`new_member_name`' that finds users that are not already members of the project, and not the owner of the project and completes the `:username` field.
 
@@ -847,7 +847,7 @@ Now for the form in projects/show.dryml. We'll use Hobo's ajax part mechanism to
       </form>
     </aside:>
 	...
-{ .dryml}
+{: .dryml}
 	
 Some things to note:
 
@@ -862,19 +862,19 @@ Some things to note:
 The sidebar we just implemented has an obvious draw-back -- there's no way to remove members. In typical RESTful style, removing a member is achieved by deleting a membership. What we'd like is a delete button on each card that removes the membership. That means what we really want are *Membership* cards in the sidebar (at the moment they are User cards). Change:
 
     <collection:members part="members"/>
-{ .dryml}
+{: .dryml}
     
 To:
 
     <collection:memberships part="members"/>
-{ .dryml}
+{: .dryml}
     
 Problem -- the membership card doesn't display the users name. There are two ways we could fix this. We could either customise the global membership card using `<extend tag="card" for="Membership">` in `application.dryml`, or we could customise *this particular usage* of the membership card. Let's do the latter. Modify the `<collection:memberships>` as follows:
     
     <collection:memberships part="members">
       <card><heading:><a:user/></heading:></card>
     </collection>
-{ .dryml}
+{: .dryml}
 
 ## Final steps
 
@@ -889,7 +889,7 @@ There's just a couple of things to do to round this part of the tutorial off. Fi
       <h3>Projects you have joined</h3>
       <collection:joined-projects><card without-creator-link/></collection>
     </section>
-{ .dryml}
+{: .dryml}
 
 Notice how we set the context on the entire section to be the current user (`with="&current_user"`). That makes the mark-up inside the section much more compact and easy to read.
 
@@ -910,14 +910,14 @@ Oh OK one more hint, here's some associations that might be handy in the Project
 
 	has_many :contributor_memberships, :class_name => "ProjectMembership", :scope => :contributor
 	has_many :contributors, :through => :contributor_memberships, :source => :user
-{ .ruby}	
+{: .ruby}	
 
 And a helper method that might come in handy from your permission methods:
 
 	def accepts_changes_from?(user)
 	  user.administrator? || user == owner || user.in?(contributors)
 	end
-{ .ruby}
+{: .ruby}
 
 
 # Part 9 -- Ideas for extending the app.
