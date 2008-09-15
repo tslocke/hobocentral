@@ -1,7 +1,7 @@
-# The DRYML Guide
+&# The DRYML Guide
 {.document-title}
 
-Welcome to the DRYML Guide. If you want to learn all the ins and outs of DRYML and become a master of quick and elegant view templates, you're in the right place. If you're very new to Hobo and DRYML you might not be in the right place, as this guide is more of a reference, designed to fill in the gaps for people who have already got the hang of the basics. Something like the Agility tutorial would be a good place to start. Right, lets get started!
+Welcome to the DRYML Guide. If you want to learn all the ins and outs of DRYML and become a master of quick and elegant view templates, you're in the right place. If you're very new to Hobo and DRYML you might not be better off with something like the Agility tutorial. This guide is somewhere between a tutorial and a reference, designed to fill in the gaps for people who have already got the hang of the basics. Right, lets get started!
 
 
 # What is DRYML?
@@ -238,12 +238,12 @@ Or like this:
     </page>
 {.dryml}
 
-An interesting question is, what happens if you give both a `<body:>` parameter and say, `<content:>`. By providing the `<body:>` parameter, you have replaced everything inside the body section, including those two parameterised `<div>` tags, so the `<body:>` you have provided will appear as normal, but the `<content:>` parameter will just be silently ignored.
+An interesting question is, what happens if you give both a `<body:>` parameter and say, `<content:>`. By providing the `<body:>` parameter, you have replaced everything inside the body section, including those two parameterised `<div>` tags, so the `<body:>` you have provided will appear as normal, but the `<content:>` parameter will be silently ignored.
 
     
 ## The Default Parameter
 
-In the situation where you only want a single parameter, you can use the special parameter name `default`:
+In the situation where you only want a single parameter, you can give your tag a more compact XML-like syntax by using the special parameter name `default`:
 
     <def tag="page">
       <html>
@@ -259,12 +259,98 @@ Now there is no need to give a parameter tag in the call at all - the content di
     
     <page> ... body content goes here -- no need for a parameter tag ... </page>
     
-You might notice that the `<page>` tag is now indistinguishable from a normal HTML tag. Some find this aspect of DRYML disconcerting at first -- how can you tell what is an HTML tag and what it a defined DRYML tag? The answer is -- you can't, and that's quite deliberate. This allows you to do nice tricks like define your own smart `<form>` tag or `<a>` tag (the Rapid library does exactly that). Other template languages (e.g. Java's JSP) like to put everything in XML namespaces. The result is very cluttered views that are boring to type and hard to read. From the start we put a very high priority on making DRYML templates compact and elegant. When you're new to DRYML you might have to do a lot of looking things up, as you would with any new language or API, but things gradually become familiar and then view templates can be read and understood very easily.
+You might notice that the `<page>` tag is now indistinguishable from a normal HTML tag. Some find this aspect of DRYML disconcerting at first -- how can you tell what is an HTML tag and what it a defined DRYML tag? The answer is -- you can't, and that's quite deliberate. This allows you to do nice tricks like define your own smart `<form>` tag or `<a>` tag (the Rapid library does exactly that). Other tag-based template languages (e.g. Java's JSP) like to put everything in XML namespaces. The result is very cluttered views that are boring to type and hard to read. From the start we put a very high priority on making DRYML templates compact and elegant. When you're new to DRYML you might have to do a lot of looking things up, as you would with any new language or API, but things gradually become familiar and then view templates can be read and understood very easily.
 {.aside}    
 
 
- - The implicit context
- 
+## The Implicit Context
+
+In addition to the most important goal behind DRYML - creating a template language that would encourage re-use in the view-layer, a secondary goal is for templates to be concise, elegant and readable. One aspect of DRYML that helps a lot in this regard is something called the *implicit context*.
+
+This feature was borne of a simple observation that pretty much every page in a web-app renders some kind of hierarchy of application objects. Think about a simple page in a blog - say, the permalink page for an individual post. The page as a whole can be considered a rendering of a BlogPost object. Then we have sections of the page that display different "pieces" of the the post -- the title, the date, the author's name, the body. Then we have the comments. The list of comments as a whole is also a "piece" of the BlogPost. Within that we have each of the individual comments, and the whole thing starts again: the comment title, date, author... This can carry on even further, for example some blogs are set-up so that you can comment on comments.
+
+This structure is incredibly common, perhaps even universal, as it seems to be intrinsically tied to the way we visually parse information. DRYML's implicit context takes advantage of this fact to make templates extremely concise while remaining readable and clear. The object that you are rendering in any part of the page is known as the *context*, and every tag has access to this object through the method `this`. The controller sets up the initial context, and the templates then only have to mention where the context needs to *change*.
+
+We'll dive straight into some examples, but first a quick general point about this guide. If you like to use the full Hobo framework, you will probably always use DRYML and the Rapid tag library together. DRYML and Rapid have grown up together, and the design of each is heavily influenced by the other. Having said that, this is the DRYML Guide, not the Rapid Guide. We won't be using any Rapid tags in this guide, because we want to document DRYML the language properly. That will possibly be a source of confusion if you're very used to working with Rapid. Just keep in mind that we're not allowed to use any Rapid tags in this guide and you'll be fine.
+
+In order to see the implicit context in its best light, we'll start by defining a `<view>` tag, that simply renders the current context with HTML escaping. Remember the context is always available as `this`:
+    
+    <def tag="view"><%= h this.to_s %></def>
+{.dryml}
+
+And here's a tag for making a link to the current context. We'll assume the object will be recognised by Rails' polymorphic routing. Let's call it `<l>` (for link).
+
+    <def tag="l"><a href="#{url_for this}" param="default"/></def>
+    
+Note that by defining that `<a>` tag, normal HTML `<a>` tags won't work anymore. We'll see how to fix that in a later section. Now let's use these tags in a page template. We'll stick with the comfortingly boring blog post example. In order to set the initial context, our controller action would need to do something like this:
+
+    def show
+      @this = @blog_post = BlogPost.find(params[:id])
+    end
+{.ruby}
+
+The DRYML template handler looks for the `@this` instance variable for the initial context. It's quite nice to also set the more conventionally named instance variable as we've done here. Now we'll create the page, let's assume we're using a `<page>` tag along the lines of those defined above. We'll also assume that the blog post object has these fields: `title`, `published_at`, `body` and `belongs_to :author`, and that the author has a `name` field.
+    
+    <page>
+      <content:>
+        <h2><view:title/></h2>
+        <div class="details">
+          Published by <l:author><view:name/></l> on <view:published-at/>.
+        </div>
+        <div class="post-body">
+          <view:body/>
+        </div>
+      </content:>
+    </page>
+{.dryml}
+
+When you see a tag like `<view:title/>`, you don't get any prizes for guessing what will be displayed. In terms of what actually happens, you can read this as "change the context to be the `title` attribute of the current context, then call the `<view`> tag". You might like to think of that change to the context as `this = this.title` (although in fact `this` is not assignable). But really you just think of it as "view the title". Of what? Of whatever is in context, in this case the blog post.
+
+Be careful with the two different uses of colon in DRYML. A trailing colon as in `<foo:>` indicates a parameter tag, whereas a colon joining two names as in `<view:title/>` indicates a change of context.
+
+When the tag ends, the context is set back to what it was. In the case of `<view/>` which is a self-closing tag familiar from XML, that happens immediately. The `<l>` tag is more interesting. We set the context to be the author, so that the link goes to the right place. Inside the `<l>` that context remains in place so we just need `<view:name/>` in order to display the author's name.
+
+## `with` and `field` attributes
+
+The `with` attribute is a special DRYML attribute that sets the context to be the result of any Ruby expression before the tag is called. In DRYML any attribute value that starts with '&' is interpreted as a Ruby expression. Here's the same example as above using only the with attribute:
+
+    <page>
+      <content:>
+        <h2><view with="@blog_post.title"/></h2>
+        <div class="details">
+          Published by <l with="&@blog_post.author"><view with="&this.name"/></l>
+          on <view with="&@blog_post.published-at"/>.
+        </div>
+        <div class="post-body">
+          <view with="&@blog_post.body"/>
+        </div>
+      </content:>
+    </page>
+{.dryml}
+
+Note that we could have used `&this.title` instead of `&@blog_post.title`.
+
+The `field` attribute makes things more compact by taking advantage of a common pattern. When changing the context, we very often want to change to some attribute of the current context. `field="x"` is a shorthand for `with="&this.x"` (actually it's not quite the same, using the `field` version also sets `this_parent` and `this_field`, whereas `with` does not. This is discussed later in more detail).
+
+The same template again, this time using `field`:
+
+    <page>
+      <content:>
+        <h2><view field="title"/></h2>
+        <div class="details">
+          Published by <l field="author"><view field="name"/></l> on <view field="published-at"/>.
+        </div>
+        <div class="post-body">
+          <view field="body"/>
+        </div>
+      </content:>
+    </page>
+{.dryml}
+
+If you compare that example to the first one, you should notice that the `:` syntax is just a shorthand for the `field` attribute. i.e. `<view field="name">` and `<view:name>` are equivalent.
+
+ - merging attributes
+
  - Repeated and optional content
  
  - Attributes
@@ -283,8 +369,14 @@ You might notice that the `<page>` tag is now indistinguishable from a normal HT
  
  - wrapping - restore and param-content
  
+ - special local variables: `attributes`, `all_attributes`, `parameters` and `all_parameters`
+ 
  - Variables - set and set-scoped
  
  - Taglibs
  
+ - Special Methods: `this_field`, `this_parent` (OTHERS?)
+ 
  - Current limitations and other gotchas
+ 
+ 
