@@ -330,7 +330,7 @@ The `with` attribute is a special DRYML attribute that sets the context to be th
 
 Note that we could have used `&this.title` instead of `&@blog_post.title`.
 
-The `field` attribute makes things more compact by taking advantage of a common pattern. When changing the context, we very often want to change to some attribute of the current context. `field="x"` is a shorthand for `with="&this.x"` (actually it's not quite the same, using the `field` version also sets `this_parent` and `this_field`, whereas `with` does not. This is discussed later in more detail).
+The `field` attribute makes things more concise by taking advantage of a common pattern. When changing the context, we very often want to change to some attribute of the current context. `field="x"` is a shorthand for `with="&this.x"` (actually it's not quite the same, using the `field` version also sets `this_parent` and `this_field`, whereas `with` does not. This is discussed later in more detail).
 
 The same template again, this time using `field`:
 
@@ -347,7 +347,7 @@ The same template again, this time using `field`:
     </page>
 {.dryml}
 
-If you compare that example to the first one, you should notice that the `:` syntax is just a shorthand for the `field` attribute. i.e. `<view field="name">` and `<view:name>` are equivalent.
+If you compare that example to the first one, you should notice that the `:` syntax is just a shorthand for the `field` attribute. i.e. `<view field="name">` and `<view:name>` are equivalent.
 
  - merging attributes
 
