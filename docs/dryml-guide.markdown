@@ -1,5 +1,5 @@
-&# The DRYML Guide
-{.document-title}
+# The DRYML Guide
+{: .document-title}
 
 Welcome to the DRYML Guide. If you want to learn all the ins and outs of DRYML and become a master of quick and elegant view templates, you're in the right place. If you're very new to Hobo and DRYML you might not be better off with something like the Agility tutorial. This guide is somewhere between a tutorial and a reference, designed to fill in the gaps for people who have already got the hang of the basics. Right, lets get started!
 
