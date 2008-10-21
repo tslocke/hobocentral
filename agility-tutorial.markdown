@@ -489,7 +489,7 @@ Whenever you create a new model + controller with Hobo, get into the habit of th
 	auto_actions :write_only, :new, :index
 {: .ruby}
 	
-Next step, we can remove the 'status' field from the Story model, and instead add an association with the StoryStatus model:
+Next, remove the 'status' field from the `fields do ... end` block in the Story model. Then add an association with the StoryStatus model:
 
 	belongs_to :status, :class_name => "StoryStatus"
 {: .ruby}
