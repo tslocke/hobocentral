@@ -792,7 +792,7 @@ You will now have a page with a sidebar, but of course you've also lost all the 
     <show-page>
       <content:>
         <section-group>
-          <section>
+          <section with-flash-messages>
             <param-content for="content"/>
           </section>
           <aside>
