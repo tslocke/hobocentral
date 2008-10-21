@@ -43,6 +43,7 @@ It's important to understand that if your application defines a custom `<page>` 
 
 Hopefully your pages will be entirely written using DRYML and Rapid. If you find that there's just one small part you can't figure out, say a link, or a form, you can just drop down to ERB and helpers for that one thing. Here are a couple of examples.
 
+
 ### Links
 
 Say you wanted to add a link to the current user's "My Account" page, which is at `/users/123/account`. Because Hobo uses normal Rails conventions of RESTful routing, you can use the familiar `link_to` helper. Here's how you would add that after the heading on one of Rapid's generated `show` pages:
@@ -67,3 +68,4 @@ Again, because Hobo doesn't change any Rails conventions for routes or for form 
         <% end %>
       </form:>
     </edit-page>
+
