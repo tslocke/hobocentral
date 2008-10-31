@@ -16,6 +16,13 @@ So the challenge is not in being able to re-use code, it is in being able to re-
 
 So DRYML is just a means to an end. The real goal is to create a library of reusable user-interface components that actually succeed in making it very quick and easy to create the view-layer of a web application. That library is also part of Hobo -- the *Rapid* tag library, but Rapid is not covered in this guide. Here we will see how DRYML provides the tools and raw materials that make a library like Rapid possible.
 
+Not covering Rapid means that many of the examples are *not* good advice for use of DRYML in a full Hobo app. For example, in this guide you might see
+
+    <%= h this.name %>
+    
+Which in an app that used Rapid would be better written `<view:name/>` or even just `<name/>` (that's a tag by the way, called `name`, not some metaprogramming trick that lets you use field names as tags). Bear that in mind while you're reading this guide. The examples are chosen to illustrate the point at hand, they are not necessarily something you want to paste right into your application.
+    
+
 
 # Simple page templates and ERB
 
@@ -50,17 +57,17 @@ In rare cases, you might use an ERB snippet to output one or more entire attribu
 
     <form <%= my_attributes %>>
     
-To do the equivalent in DRYML, you would need your attributes to be in a hash (rather than a string), and do:
+We're jumping ahead here, so just skip this if it does't make sense, but to do the equivalent in DRYML, you would need your attributes to be in a hash (rather than a string), and do:
 
     <form merge-attrs="&my_attributes">
     
 Finally, in a rare case you could even use an ERB snippet to generate the tag name itself:
 
-    <<%= my_tag_name>> ... </<%= my_tag_name %>>
+    <<%= my_tag_name %>> ... </<%= my_tag_name %>>
     
-To achieve that in DRYML, you would use the special tag `call-tag`
+To achieve that in DRYML, you could put the angle brackets in the snippet too:
 
-    <call-tag tag="&my_tag_name"> ... </call-tag>
+    <%= "<#{my_tag_name}>" %> ... <%= "</#{my_tag_name}>" %>
     
 ## Wot no layouts?
 
@@ -263,7 +270,7 @@ You might notice that the `<page>` tag is now indistinguishable from a normal HT
 {.aside}    
 
 
-## The Implicit Context
+# The Implicit Context
 
 In addition to the most important goal behind DRYML - creating a template language that would encourage re-use in the view-layer, a secondary goal is for templates to be concise, elegant and readable. One aspect of DRYML that helps a lot in this regard is something called the *implicit context*.
 
@@ -348,14 +355,178 @@ The same template again, this time using `field`:
 {.dryml}
 
 If you compare that example to the first one, you should notice that the `:` syntax is just a shorthand for the `field` attribute. i.e. `<view field="name">` and `<view:name>` are equivalent.
+    
+# Tag attributes
 
- - merging attributes
+As we've seen, DRYML provides parameters as a mechanism for customising the markup that is output by a tag. Sometimes we want to provide other kinds of values to control the behaviour of a tag: URLs, filenames or even ruby values like hashes and arrays. For this situation, DRYML lets you define tag attributes.
 
- - Repeated and optional content
- 
- - Attributes
- 
- - Parameters
+As a simple example, say your application has a bunch of help files in `public/help`, and you have links to them scattered around your views. Here's a tag you could define:
+
+    <def tag="help-link" attrs="file">
+      <a class="help" href="#{base_url}/help/#{file}.html" param="default"/>
+    </def>
+{: .dryml}
+
+`<def>` takes a special attribute `attrs`. Use this to declare a list (separated by commas) of attributes, much as you declare arguments to a method in Ruby. In this definition we contstruct the URL from the `base_url` helper and `file`, which is a local variable. You should think of `file` as an ordinary argument to a method. Just like arguments in Ruby, it becomes a local variable inside the tag definition. Notice the use of the Ruby string interpolation syntax (`#{...}`) inside that `href`. You can use that syntax in any attribute in DRYML.
+
+The call to this tag would look like:
+
+    <help-link file="intro">Introductory Help</help-link>
+{: .dryml}
+
+The regular XML-link arttribute syntax -- `file="intro"` -- will be pass a string value to the attribute. DRYML also allows you to pass any Ruby value. When the attribute value starts with `&`, the rest of the attribute is interpretted as a Ruby expression. For example you could use this syntax to pass `true` and `false` values:
+
+    <help-link file="intro" new-window="&true">Introductory Help</help-link>
+    <help-link file="intro" new-window="&false">Introductory Help</help-link>
+{: .dryml}
+
+And we could add that `new-window` attribute to the definition like this:
+
+    <def tag="help-link" attrs="file, new-window">
+      <a class="help" href="#{base_url}/help/#{file}.html" target="#{new_window ? '_blank' : '_self' }" param="default"/>
+    </def>
+{: .dryml}
+
+An important point to notice there is that the markup-friendly dash in the `new-window` attribute, became a Ruby-friendly underscore (`new_window`) in the Ruby expression.
+
+Using the `&`, you can pass any value you like -- arrays, hashes, active-record objects...
+
+In the case of boolean values like the one used in the above example, there is a nicer syntax that can be used in the call...
+
+
+## Flag attributes
+
+That `new-window` attribute shown in the previous section is simple switch - on or off. DRYML lets you ommit the value of the attribute, giving a flag-like syntax:
+
+    <help-link file="intro" new-window>Introductory Help</help-link>
+    <help-link file="intro">Introductory Help</help-link>
+{: .dryml}
+
+Ommitting the attribute value is equivalent to giving `"&true"` as the value. In the second exampe the attribute is ommitted entirely, meaning the value will be `nil` which is false in Ruby so it works as expected.
+
+
+## `attributes` and `all_attributes` locals
+
+Inside a tag definition two hashes are available in local variable: `attributes` contains all the attributes that *were not declared* in the `attrs` list of the `def`; `all_attributes` contains every attribute, including the declared ones.
+
+
+## Merging Attributes
+
+In a tag definition, you can use the `merge-attrs` attribute to take any 'extra' attributes that the caller passed in, and add them to a tag of your choosing inside your definition. Let's backtrack a bit and see why you might want to do that.
+
+Here's a simple tag definition - it's similar to a tag defined in the Hobo Cookbook app:
+
+    <def tag="markdown-help">
+      <a href="http://daringfireball.net/projects/markdown/syntax" param="default"/>
+    </def>
+{: .dryml}
+
+You would use it like this:
+
+    Add formatting to your recipe using <markdown-help>markdown</markdown-help>
+{: .dryml}
+
+Suppose you wanted to give the caller the ability to chose the `target` for the link. You could extend the definition like this:
+
+    <def tag="markdown-help" attrs="target">
+      <a href="http://daringfireball.net/projects/markdown/syntax" target="&target" param="default"/>
+    </def>
+{: .dryml}
+
+Now we can call the tag like this:
+
+    Add formatting to your recipe using <markdown-help target="_blank">markdown</markdown-help>
+{: .dryml}
+
+OK, but maybe the caller wants to add a css class, or a javascript `onclick` attribute, or any one of a dozen potential HTML attributes. This approach is not going to scale. That's where `merge-attrs` comes in. As we've seen, any a
+
+As mentioned, DRYML keeps track of all the attributes that were passed to a tag, even if they were not declared in the `attrs` list of the tag definition. They are available in two hashes: `attributes` (that has only undeclared attributes) and `all_attributes` (that has all of them), but in normal usage you don't need to access those variable. To add all of the undelcared attribtues to a tag inside your definition, just add the `merge-attrs` attribute, like this:
+
+    <def tag="markdown-help">
+      <a href="http://daringfireball.net/projects/markdown/syntax" merge-attrs param="default"/>
+    </def>
+{: .dryml}
+
+Note that the `merge` attribute is another way of merging attributes. Declaring `merge` is a shorthand for declaraing both `merge-attrs` and `merge-params` (which we'll cover later).
+
+# Repeated and optional content
+
+As you would expect from any template language, DRYML has the facility to repeat sections on content, and to optionally render or not render given sections according to your applications data. DRYML provides two alternative syntaxes, much as Ruby does (e.g. Ruby has the block `if` and the one-line suffix version of `if`).
+
+## Conditionals - if and unless
+
+DRYML provides `if` and `unless` both as tags, which come from the core tag library, and are just ordinary tag definitions, and as attributes, which are part of the language:
+
+The tag version:
+
+    <if test="&logged_in?"><p>Welcome back</p></if>
+{: .dryml}
+
+The attribute version:
+
+    <p if="&logged_in?">Welcome back</p>
+{: .dryml}
+    
+Important note! The test if performed (in Ruby terms) like this:
+
+    if (...your test expression...).blank?
+    
+Got that? Blankiness not thruthiness (`blank?` comes from ActiveSupport by the way -- Rails' mixed bag of core-Ruby extensions). So for example, in DRYML
+
+    <if test="&current_user.comments">
+{: .dryml}
+
+is a test to see if there are any comments -- empty collections are considered blank. We are of the opinion that Matz made a fantastic choice for Ruby when he followed the Lisp / Smalltalk approach to truth values, but that view templates are a special case, and testing for blankness is more often what you want.
+
+Can we skip unless? You get the picture, right?
+
+
+## Repitition, repitition, repitition, repitition, repitition
+
+Some things need to be repeated. Some things, like the word 'repitition' in a sub-title, don't. And then they are. Life can be like that. It doesn't matter. For repition DRYML gives us the `<repeat>` tag (from the core tag library) and the `repeat` attribute.
+    
+The tag version:
+    
+    <repeat with="&current_user.new_messages"> <h3><%= h this.subject %></h3> </repeat>
+{: .dryml}
+
+The attribute version:
+
+    <h3 repeat="&current_user.new_messages"><%= h this.subject %></h3>
+    
+Notice that as well as the content being repeated, the implicit-context is set to each item in the collection in turn.
+
+
+### even/odd classes
+
+It's a common need to want alternating styles for items in a collection - e.g. striped table rows. Both the repeat attribute and the repeat tag set a scoped variable `scope.even_odd` which will be alternately 'even' then 'odd', so for example you could do:
+
+    <h3 repeat="&current_user.new_messages" class="#{scope.even_odd}"><%= h this.subject %></h3>
+    
+That example illustrates another important point -- any Ruby code in attributes is evaluated *inside* the repeat. In other words, the `repeat` attribute behaves the same as wrapping the tag in a `<repeat>` tag.
+    
+    
+### `first_item?` and `last_item?` helpers
+
+Another common need is to give special treatment to the first and last items in a collection. The `first_item?` and `last_item?` helpers can be used to find out when these items come up, e.g we could capitalise the first item:
+
+    <h3 repeat="&current_user.new_messages"><%= h(first_item? ? this.subject.upcase : this.subject) %></h3>
+
+### Repeating over hashes
+
+If you give a hash as the value to repeat over, DRYML will iterate over each key/value pair, with the value available as `this` (i.e. the implicit-context) and the key available as `this_key`. This is particularly useful for grouping things in combination with the `group_by` method:
+
+    <div repeat="&current_user.new_messages.group_by(&:sender)">
+      <h2>Messages from <%= h this_key %></h2>
+        <ul>
+          <li repeat><%= h this.subject %></li>
+        </ul>
+      <h2>
+    </div>
+    
+That example has given a sneak preview of another point - using if/unless/repeat with the implicit context. We'll get to that in a minute.
+
+# Still to write
  
  - before/after/append/prepend and without
   
