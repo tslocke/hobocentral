@@ -30,7 +30,7 @@ NOTE: The content here is mostyl out of date. The manual is moving to:
 
 ## Tag Libraries
 
-The tag library documentation has moved to [cookbook.hobocentral.net/api_taglibs](http://cookbook.hobocentral.net/api_taglibs)
+The tag library documentation has moved to [cookbook.hobocentral.net](http://cookbook.hobocentral.net/api_taglibs)
 
 ## Howtos
 
