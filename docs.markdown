@@ -7,8 +7,9 @@
 
 ## Tutorials
 
- * [Agility Tutorial (story manager)](/agility-tutorial)
- * [POD Tutorial (classified ads) NOT YET UPDATED for Hobo 0.8](/pod-tutorial)
+The tutorials are moving to [The Hobo Cookbook](http://cookbook.hobocentral.net/tutorials)
+
+The [POD Tutorial](/pod-tutorial) is still here but is currently rather out of date. Sorry about that - it's on the to-do list!
 
 ## Manual
 
